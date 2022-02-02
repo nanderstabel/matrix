@@ -1,9 +1,10 @@
-use rsb::matrix::Matrix;
-use rsb::vector::Vector;
+use matrix::matrix::Matrix;
+use matrix::vector::Vector;
 
 #[allow(dead_code)]
 fn main() {
-    add_subtract_scale(0, 0);
+    let m = Matrix::from(&[&[1, 2], &[3, 4]]);
+    println!("{}", m);
 }
 
 #[cfg(test)]
