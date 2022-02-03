@@ -1,7 +1,5 @@
-use std::{
-    fmt,
-    ops::{Add, Mul, Sub},
-};
+use crate::*;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Matrix<K: Clone> {
@@ -10,7 +8,7 @@ pub struct Matrix<K: Clone> {
     matrix: Vec<Vec<K>>,
 }
 
-impl<K: Clone + Copy + Add<Output = K> + Sub<Output = K> + Mul<Output = K>> Matrix<K> {
+impl<K: Generic<K>> Matrix<K> {
     pub fn from<T, Row>(matrix: T) -> Self
     where
         T: AsRef<[Row]>,

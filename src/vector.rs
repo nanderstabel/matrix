@@ -1,7 +1,9 @@
-use std::{
-    fmt,
-    ops::{Add, Mul, Sub},
-};
+use crate::*;
+use std::fmt;
+
+pub trait Scalar<K> {
+    fn from<T: AsRef<[K]>>(vector: T) -> Self;
+}
 
 #[derive(Debug)]
 pub struct Vector<K: Clone> {
@@ -9,14 +11,16 @@ pub struct Vector<K: Clone> {
     vector: Vec<K>,
 }
 
-impl<K: Clone + Copy + Add<Output = K> + Sub<Output = K> + Mul<Output = K>> Vector<K> {
-    pub fn from<T: AsRef<[K]>>(vector: T) -> Self {
+impl<K: Clone> Scalar<K> for Vector<K> {
+    fn from<T: AsRef<[K]>>(vector: T) -> Self {
         Vector {
             size: vector.as_ref().len(),
             vector: vector.as_ref().to_vec(),
         }
     }
+}
 
+impl<K: Generic<K>> Vector<K> {
     pub fn size(self) -> usize {
         self.size
     }
