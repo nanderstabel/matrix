@@ -3,8 +3,11 @@ use matrix::vector::Vector;
 
 #[allow(dead_code)]
 fn main() {
-    let m = Matrix::from(&[&[1, 2], &[3, 4]]);
-    println!("{}", m);
+    // let v = Vector::<i32>::from([1, 2, 3, 4, 5]);
+    // let w = Vector::<i32>::from([6, 7, 8, 9, 10]);
+
+    // println!("{}", v);
+    // println!("{:?}", v.size());
 }
 
 #[cfg(test)]
@@ -12,7 +15,28 @@ mod add_subtract_scale {
     use super::*;
 
     #[test]
-    fn assert_equal() {
-        assert_eq!(add_subtract_scale(0, 0), 0);
+    fn vector_add() {
+        let mut u = Vector::from([2., 3.]);
+        let v = Vector::from([5., 7.]);
+        u.add(&v);
+        assert_eq!(u, Vector::from([7., 10.]));
+
+        let mut u = Vector::from([-2., 3.]);
+        let v = Vector::from([5., 7.]);
+        u.add(&v);
+        assert_eq!(u, Vector::from([3., 10.]));
+
+        let mut u = Vector::<i32>::from([]);
+        let v = Vector::from([]);
+        u.add(&v);
+        assert_eq!(u, Vector::from([]));
+    }
+
+    #[test]
+    fn matrix_add() {
+        let mut m = Matrix::from([[1., 2.], [3., 4.]]);
+        let ma = Matrix::from([[7., 4.], [-2., 2.]]);
+        m.add(&ma);
+        assert_eq!(m, Matrix::from([[8., 6.], [1., 6.]]));
     }
 }
