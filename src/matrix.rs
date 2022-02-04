@@ -46,11 +46,11 @@ impl<K: Element<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
     }
 }
 
-// impl<K, T, Row> From<T> for Matrix<K>
+// impl<K: Clone, T, Row> From<T> for Matrix<K>
 // where
 //     K: Element<K>,
-//     Row: AsRef<[K]>,
 //     T: AsRef<[Row]>,
+//     Row: Clone + AsRef<[K]>,
 // {
 //     fn from(m: T) -> Self {
 //         let m: Vec<Vec<K>> = m
@@ -127,16 +127,16 @@ mod matrix {
         assert_eq!(Matrix::from([[1]]).shape(), (1, 1));
     }
 
-    // #[test]
-    // fn is_square() {
-    //     assert_eq!(Matrix::<i32>::from(&[&[]]).is_square(), true);
-    //     assert_eq!(Matrix::from(&[&[1]]).is_square(), true);
-    //     assert_eq!(Matrix::from(&[&[1, 2], &[3, 4]]).is_square(), true);
+    #[test]
+    fn is_square() {
+        assert_eq!(Matrix::<i32>::from(&[&[]]).is_square(), true);
+        assert_eq!(Matrix::from(&[&[1]]).is_square(), true);
+        assert_eq!(Matrix::from(&[&[1, 2], &[3, 4]]).is_square(), true);
 
-    //     assert_eq!(Matrix::from(&[&[0, 1]]).is_square(), false);
-    //     assert_eq!(
-    //         Matrix::from(&[&[1, 2], &[3, 4], &[5, 6]]).is_square(),
-    //         false
-    //     );
-    // }
+        assert_eq!(Matrix::from(&[&[0, 1]]).is_square(), false);
+        assert_eq!(
+            Matrix::from(&[&[1, 2], &[3, 4], &[5, 6]]).is_square(),
+            false
+        );
+    }
 }
