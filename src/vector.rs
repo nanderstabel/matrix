@@ -37,7 +37,11 @@ impl<K: Element<K>> VectorSpace<Vector<K>, K> for Vector<K> {
     }
 }
 
-impl<K: std::clone::Clone, T: AsRef<[K]>> From<T> for Vector<K> {
+impl<K, T> From<T> for Vector<K>
+where
+    K: Element<K>,
+    T: AsRef<[K]>,
+{
     fn from(v: T) -> Self {
         let v = v.as_ref().to_vec();
         Vector {
