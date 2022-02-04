@@ -71,7 +71,7 @@ impl<K: Element<K>> Matrix<K> {
     pub fn from<T, Row>(matrix: T) -> Self
     where
         T: AsRef<[Row]>,
-        Row: Clone + Copy + AsRef<[K]>,
+        Row: Clone + AsRef<[K]>,
     {
         let matrix: Vec<Vec<K>> = matrix
             .as_ref()
