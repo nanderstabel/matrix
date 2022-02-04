@@ -1,14 +1,8 @@
-use matrix::matrix::Matrix;
-use matrix::vector::Vector;
+// use matrix::matrix::Matrix;
+use matrix::{vector::Vector, VectorSpace};
 
 #[allow(dead_code)]
-fn main() {
-    // let v = Vector::<i32>::from([1, 2, 3, 4, 5]);
-    // let w = Vector::<i32>::from([6, 7, 8, 9, 10]);
-
-    // println!("{}", v);
-    // println!("{:?}", v.size());
-}
+fn main() {}
 
 #[cfg(test)]
 mod add_subtract_scale {
@@ -32,11 +26,11 @@ mod add_subtract_scale {
         assert_eq!(u, Vector::from([]));
     }
 
-    #[test]
-    fn matrix_add() {
-        let mut m = Matrix::from([[1., 2.], [3., 4.]]);
-        let ma = Matrix::from([[7., 4.], [-2., 2.]]);
-        m.add(&ma);
-        assert_eq!(m, Matrix::from([[8., 6.], [1., 6.]]));
-    }
+    //     #[test]
+    //     fn matrix_add() {
+    //         let mut m = Matrix::from([[1., 2.], [3., 4.]]);
+    //         let ma = Matrix::from([[7., 4.], [-2., 2.]]);
+    //         m.add(&ma);
+    //         assert_eq!(m, Matrix::from([[8., 6.], [1., 6.]]));
+    //     }
 }

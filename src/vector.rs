@@ -1,31 +1,20 @@
 use crate::*;
 use std::fmt;
 
-pub trait Scalar<K> {
-    fn from<T: AsRef<[K]>>(vector: T) -> Self;
-}
-
 #[derive(Debug)]
-pub struct Vector<K: Clone> {
+pub struct Vector<K> {
     size: usize,
     vector: Vec<K>,
 }
 
-impl<K: Clone> Scalar<K> for Vector<K> {
-    fn from<T: AsRef<[K]>>(vector: T) -> Self {
-        Vector {
-            size: vector.as_ref().len(),
-            vector: vector.as_ref().to_vec(),
-        }
-    }
-}
-
-impl<K: Generic<K>> Vector<K> {
+impl<K> Vector<K> {
     pub fn size(self) -> usize {
         self.size
     }
+}
 
-    pub fn add(&mut self, v: &Vector<K>) {
+impl<K: Element<K>> VectorSpace<Vector<K>, K> for Vector<K> {
+    fn add(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
             .iter()
@@ -34,7 +23,7 @@ impl<K: Generic<K>> Vector<K> {
             .collect()
     }
 
-    pub fn sub(&mut self, v: &Vector<K>) {
+    fn sub(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
             .iter()
@@ -43,8 +32,18 @@ impl<K: Generic<K>> Vector<K> {
             .collect()
     }
 
-    pub fn scl(&mut self, a: K) {
+    fn scl(&mut self, a: K) {
         self.vector = self.vector.iter().map(|&v| v * a).collect()
+    }
+}
+
+impl<K: std::clone::Clone, T: AsRef<[K]>> From<T> for Vector<K> {
+    fn from(v: T) -> Self {
+        let v = v.as_ref().to_vec();
+        Vector {
+            size: v.len(),
+            vector: v,
+        }
     }
 }
 
@@ -56,16 +55,9 @@ impl<K: Clone + PartialEq> PartialEq for Vector<K> {
 
 impl<K: Clone + PartialEq> Eq for Vector<K> {}
 
-impl<K: fmt::Display + Clone> fmt::Display for Vector<K> {
+impl<K: std::fmt::Debug> fmt::Display for Vector<K> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.size == 0 {
-            write!(f, "[]")?;
-        } else {
-            for item in &self.vector {
-                write!(f, "[{}]\n", item)?;
-            }
-        }
-        Ok(())
+        write!(f, "{:?}", self.vector)
     }
 }
 
