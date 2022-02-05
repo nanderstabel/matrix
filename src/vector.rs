@@ -1,7 +1,7 @@
 use crate::*;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Vector<K> {
     size: usize,
     vector: Vec<K>,
@@ -13,7 +13,11 @@ impl<K> Vector<K> {
     }
 }
 
-impl<K: Element<K>> VectorSpace<Vector<K>, K> for Vector<K> {
+impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
+    fn get(&mut self) -> Vec<K> {
+        self.vector.clone()
+    }
+
     fn add(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
@@ -39,7 +43,7 @@ impl<K: Element<K>> VectorSpace<Vector<K>, K> for Vector<K> {
 
 impl<K, T> From<T> for Vector<K>
 where
-    K: Element<K>,
+    K: Scalar<K>,
     T: AsRef<[K]>,
 {
     fn from(v: T) -> Self {

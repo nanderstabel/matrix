@@ -1,7 +1,7 @@
 use crate::*;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Matrix<K> {
     n: usize,
     m: usize,
@@ -18,7 +18,11 @@ impl<K> Matrix<K> {
     }
 }
 
-impl<K: Element<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
+impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
+    fn get(&mut self) -> Vec<K> {
+        todo!();
+    }
+
     fn add(&mut self, m: &Matrix<K>) {
         self.matrix = self
             .matrix
@@ -48,7 +52,7 @@ impl<K: Element<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
 
 // impl<K: Clone, T, Row> From<T> for Matrix<K>
 // where
-//     K: Element<K>,
+//     K: Scalar<K>,
 //     T: AsRef<[Row]>,
 //     Row: Clone + AsRef<[K]>,
 // {
@@ -67,7 +71,7 @@ impl<K: Element<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
 //     }
 // }
 
-impl<K: Element<K>> Matrix<K> {
+impl<K: Scalar<K>> Matrix<K> {
     pub fn from<T, Row>(matrix: T) -> Self
     where
         T: AsRef<[Row]>,

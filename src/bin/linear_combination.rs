@@ -1,15 +1,22 @@
-use matrix::{vector::Vector, Element, VectorSpace};
+use matrix::{vector::Vector, Scalar, VectorSpace};
+use safe_arch::m256;
+
+use safe_arch::fused_mul_add_m256;
+use safe_arch::*;
 
 fn linear_combination<'a, V, K>(u: &[V], coefs: &'a [K]) -> V
 where
     V: VectorSpace<V, K> + From<&'a [K]> + std::fmt::Display,
-    K: 'a + Element<K>,
+    K: 'a + Scalar<K>,
 {
-    // for v in u {
-    //     let new = v.iter().copied();
-    //     new.scl(coefs[0]);
-    //     println!("{}", new);
-    // }
+    let a = m256::from([1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+    let b = m256::from([0.0, 10.0, -100.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+    let c = m256::from([0.0, 10.0, -2.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+
+    // use safe_arch::*;
+    let result = fused_mul_add_m256(a, b, c).to_array();
+
+    println!("{:?}", result);
 
     let mut v = V::from(coefs);
     v.scl(coefs[0]);
