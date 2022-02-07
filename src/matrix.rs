@@ -23,7 +23,7 @@ impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
         todo!();
     }
 
-    fn add(&mut self, m: &Matrix<K>) {
+    fn _add(&mut self, m: &Matrix<K>) {
         self.matrix = self
             .matrix
             .iter()
@@ -32,7 +32,7 @@ impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
             .collect()
     }
 
-    fn sub(&mut self, m: &Matrix<K>) {
+    fn _sub(&mut self, m: &Matrix<K>) {
         self.matrix = self
             .matrix
             .iter()
@@ -47,6 +47,36 @@ impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
             .iter()
             .map(|r| r.iter().map(|&v| v * a).collect())
             .collect()
+    }
+}
+
+impl<K: Scalar<K>> Add for Matrix<K> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        let mut res = self.clone();
+        res._add(&other);
+        res
+    }
+}
+
+impl<K: Scalar<K>> Sub for Matrix<K> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let mut res = self.clone();
+        res._sub(&other);
+        res
+    }
+}
+
+impl Mul<f32> for Matrix<f32> {
+    type Output = Self;
+
+    fn mul(self, f: f32) -> Self {
+        let mut res = self.clone();
+        res.scl(f);
+        res
     }
 }
 

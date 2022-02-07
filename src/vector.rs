@@ -7,9 +7,17 @@ pub struct Vector<K> {
     vector: Vec<K>,
 }
 
-impl<K> Vector<K> {
+impl<K: Scalar<K>> Vector<K> {
     pub fn size(self) -> usize {
         self.size
+    }
+
+    pub fn dot(&self, v: Vector<K>) -> K {
+        self.vector
+            .iter()
+            .zip(v.vector.iter())
+            .map(|(&u, &ve)| u * ve)
+            .sum()
     }
 }
 
@@ -18,7 +26,7 @@ impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
         self.vector.clone()
     }
 
-    fn add(&mut self, v: &Vector<K>) {
+    fn _add(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
             .iter()
@@ -27,7 +35,7 @@ impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
             .collect()
     }
 
-    fn sub(&mut self, v: &Vector<K>) {
+    fn _sub(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
             .iter()
@@ -38,6 +46,36 @@ impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
 
     fn scl(&mut self, a: K) {
         self.vector = self.vector.iter().map(|&v| v * a).collect()
+    }
+}
+
+impl<K: Scalar<K>> Add for Vector<K> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        let mut res = self.clone();
+        res._add(&other);
+        res
+    }
+}
+
+impl<K: Scalar<K>> Sub for Vector<K> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        let mut res = self.clone();
+        res._sub(&other);
+        res
+    }
+}
+
+impl Mul<f32> for Vector<f32> {
+    type Output = Self;
+
+    fn mul(self, f: f32) -> Self {
+        let mut res = self.clone();
+        res.scl(f);
+        res
     }
 }
 

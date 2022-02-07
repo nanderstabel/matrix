@@ -12,17 +12,17 @@ mod add_subtract_scale {
     fn vector_add() {
         let mut u = Vector::from([2., 3.]);
         let v = Vector::from([5., 7.]);
-        u.add(&v);
+        u._add(&v);
         assert_eq!(u, Vector::from([7., 10.]));
 
         let mut u = Vector::from([-2., 3.]);
         let v = Vector::from([5., 7.]);
-        u.add(&v);
+        u._add(&v);
         assert_eq!(u, Vector::from([3., 10.]));
 
-        let mut u = Vector::<i32>::from([]);
+        let mut u = Vector::<f32>::from([]);
         let v = Vector::from([]);
-        u.add(&v);
+        u._add(&v);
         assert_eq!(u, Vector::from([]));
     }
 
@@ -30,7 +30,7 @@ mod add_subtract_scale {
     fn matrix_add() {
         let mut m = Matrix::from([[1., 2.], [3., 4.]]);
         let ma = Matrix::from([[7., 4.], [-2., 2.]]);
-        m.add(&ma);
+        m._add(&ma);
         assert_eq!(m, Matrix::from([[8., 6.], [1., 6.]]));
     }
 }
