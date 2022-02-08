@@ -27,18 +27,18 @@ mod linear_map {
         assert_eq!(u.mul_vec(&v), Vector::from([4., -4.]));
     }
 
-    // #[test]
-    // fn matrix_multiplication() {
-    //     let u = Matrix::from([[1., 0.], [0., 1.]]);
-    //     let v = Matrix::from([[1., 0.], [0., 1.]]);
-    //     assert_eq!(u.mul_mat(&v), Matrix::from([[1., 0.], [0., 1.]]));
+    #[test]
+    fn matrix_multiplication() {
+        let mut u = Matrix::from([[1., 0.], [0., 1.]]);
+        let v = Matrix::from([[1., 0.], [0., 1.]]);
+        assert_eq!(u.mul_mat(&v), Matrix::from([[1., 0.], [0., 1.]]));
 
-    //     let u = Matrix::from([[1., 0.], [0., 1.]]);
-    //     let v = Matrix::from([[2., 1.], [4., 2.]]);
-    //     assert_eq!(u.mul_mat(&v), Matrix::from([[2., 1.], [4., 2.]]));
+        let mut u = Matrix::from([[1., 0.], [0., 1.]]);
+        let v = Matrix::from([[2., 1.], [4., 2.]]);
+        assert_eq!(u.mul_mat(&v), Matrix::from([[2., 1.], [4., 2.]]));
 
-    //     let u = Matrix::from([[3., -5.], [6., 8.]]);
-    //     let v = Matrix::from([[2., 1.], [4., 2.]]);
-    //     assert_eq!(u.mul_mat(&v), Matrix::from([[-14., -7.], [44., 22.]]));
-    // }
+        let mut u = Matrix::from([[3., -5.], [6., 8.]]);
+        let v = Matrix::from([[2., 1.], [4., 2.]]);
+        assert_eq!(u.mul_mat(&v), Matrix::from([[-14., -7.], [44., 22.]]));
+    }
 }

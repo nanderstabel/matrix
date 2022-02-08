@@ -11,16 +11,10 @@ pub struct Matrix<K> {
     pub matrix: Vec<Vec<K>>,
 }
 
-// self.vector
-//     .iter()
-//     .zip(v.vector.iter())
-//     .map(|(&u, &ve)| u * ve)
-//     .sum()
-
 impl<K: Scalar<K> + Float> Matrix<K>
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32>,
+    K: num::traits::Pow<f32> + std::fmt::Display,
 {
     pub fn shape(self) -> (usize, usize) {
         (self.n, self.m)
@@ -48,8 +42,23 @@ where
         }
     }
 
-    fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
-        todo!();
+    pub fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
+        let mut mat = mat.clone();
+        mat.transpose();
+        mat.matrix = (0..self.n)
+            .map(|row| {
+                (0..mat.m)
+                    .map(|column| {
+                        let r = Vector::from(self.matrix[row].clone());
+                        let c = Vector::from(mat.matrix[column].clone());
+                        r.dot(c)
+                    })
+                    .collect()
+            })
+            .collect();
+        mat.m = mat.n;
+        mat.n = self.n;
+        mat
     }
 }
 
