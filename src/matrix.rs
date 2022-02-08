@@ -16,10 +16,14 @@ impl<K> Matrix<K> {
     pub fn is_square(self) -> bool {
         self.n == self.m
     }
+
+    pub fn mul_vec(&mut self, vec: Vector<K>) -> Vector<K> {}
+
+    // fn mul_mat(&mut self, mat: Matrix<K>) -> Matrix<K>;
 }
 
 impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
-    fn get(&mut self) -> Vec<K> {
+    fn get(&self) -> Vec<K> {
         todo!();
     }
 

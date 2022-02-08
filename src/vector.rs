@@ -1,13 +1,18 @@
 use crate::*;
-use std::fmt;
+use num::{pow::Pow, Float};
+use std::{fmt, iter::Sum};
 
 #[derive(Clone, Debug)]
 pub struct Vector<K> {
     size: usize,
-    vector: Vec<K>,
+    pub vector: Vec<K>,
 }
 
-impl<K: Scalar<K>> Vector<K> {
+impl<K: Scalar<K> + Float> Vector<K>
+where
+    f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
+    K: num::traits::Pow<f32>,
+{
     pub fn size(self) -> usize {
         self.size
     }
@@ -19,10 +24,39 @@ impl<K: Scalar<K>> Vector<K> {
             .map(|(&u, &ve)| u * ve)
             .sum()
     }
+
+    pub fn norm_1(&mut self) -> f32 {
+        self.vector
+            .clone()
+            .into_iter()
+            .map(|i| if i > -i { i } else { -i })
+            .sum::<f32>()
+            .into()
+    }
+
+    pub fn norm(&mut self) -> f32 {
+        self.vector
+            .clone()
+            .into_iter()
+            .map(|i| i.pow(2.))
+            .sum::<f32>()
+            .sqrt()
+            .into()
+    }
+
+    pub fn norm_inf(&mut self) -> f32 {
+        self.vector
+            .clone()
+            .into_iter()
+            .min_by(|a, b| b.abs().partial_cmp(&a.abs()).unwrap())
+            .unwrap()
+            .abs()
+            .into()
+    }
 }
 
 impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
-    fn get(&mut self) -> Vec<K> {
+    fn get(&self) -> Vec<K> {
         self.vector.clone()
     }
 
