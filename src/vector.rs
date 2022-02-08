@@ -4,7 +4,7 @@ use std::{fmt, iter::Sum};
 
 #[derive(Clone, Debug)]
 pub struct Vector<K> {
-    size: usize,
+    pub size: usize,
     pub vector: Vec<K>,
 }
 

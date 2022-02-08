@@ -1,6 +1,4 @@
 use matrix::{vector::Vector, Scalar, VectorSpace};
-use num::pow::Pow;
-use std::iter::Sum;
 
 fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K> {
     Vector::from([

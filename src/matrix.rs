@@ -1,14 +1,26 @@
+use crate::vector::Vector;
 use crate::*;
+use num::{pow::Pow, Float};
 use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct Matrix<K> {
-    n: usize,
-    m: usize,
-    matrix: Vec<Vec<K>>,
+    pub n: usize,
+    pub m: usize,
+    pub matrix: Vec<Vec<K>>,
 }
 
-impl<K> Matrix<K> {
+// self.vector
+//     .iter()
+//     .zip(v.vector.iter())
+//     .map(|(&u, &ve)| u * ve)
+//     .sum()
+
+impl<K: Scalar<K> + Float> Matrix<K>
+where
+    f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
+    K: num::traits::Pow<f32>,
+{
     pub fn shape(self) -> (usize, usize) {
         (self.n, self.m)
     }
@@ -17,9 +29,20 @@ impl<K> Matrix<K> {
         self.n == self.m
     }
 
-    pub fn mul_vec(&mut self, vec: Vector<K>) -> Vector<K> {}
+    pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
+        Vector {
+            size: 3,
+            vector: self
+                .matrix
+                .iter()
+                .map(|m| Vector::from(m).dot(vec.clone()))
+                .collect::<Vec<K>>(),
+        }
+    }
 
-    // fn mul_mat(&mut self, mat: Matrix<K>) -> Matrix<K>;
+    fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
+        todo!();
+    }
 }
 
 impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
