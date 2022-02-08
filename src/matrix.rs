@@ -19,7 +19,7 @@ where
         self.matrix.clone()
     }
 
-    pub fn shape(self) -> (usize, usize) {
+    pub fn shape(&self) -> (usize, usize) {
         (self.n, self.m)
     }
 
@@ -108,6 +108,41 @@ where
             pivot += 1;
         }
         res
+    }
+
+    fn dim2_determinant(&self, m: Vec<Vec<K>>) -> K {
+        m[0][0] * m[1][1] - m[0][1] * m[1][0]
+    }
+
+    fn dim3_determinant(&self, m: Vec<Vec<K>>) -> K {
+        m[0][0] * self.dim2_determinant(vec![m[1][1..].to_vec(), m[2][1..].to_vec()])
+            - m[0][1] * self.dim2_determinant(vec![vec![m[1][0], m[1][2]], vec![m[2][0], m[2][2]]])
+            + m[0][2] * self.dim2_determinant(vec![m[1][..2].to_vec(), m[2][..2].to_vec()])
+    }
+
+    fn dim4_determinant(&self) -> K {
+        todo!();
+        let mut clone = self.clone();
+        clone.row_echelon();
+        clone.matrix[0][0] * clone.matrix[1][1] * clone.matrix[2][2] * clone.matrix[3][3]
+    }
+
+    pub fn determinant(&mut self) -> K {
+        match self.shape() {
+            (2, 2) => self.dim2_determinant(self.get()),
+            (3, 3) => self.dim3_determinant(self.get()),
+            (4, 4) => self.dim4_determinant(),
+            _ => panic!(),
+        }
+    }
+
+    // pub fn inverse(&mut self) -> Result<Matrix<K>> {
+    pub fn inverse(&mut self) -> Matrix<K> {
+        todo!();
+    }
+
+    pub fn rank(&mut self) -> usize {
+        todo!();
     }
 }
 
