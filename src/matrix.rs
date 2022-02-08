@@ -60,6 +60,10 @@ where
         mat.n = self.n;
         mat
     }
+
+    pub fn trace(&mut self) -> K {
+        (0..self.n).map(|idx| self.matrix[idx][idx]).sum()
+    }
 }
 
 impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
