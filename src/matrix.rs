@@ -2,6 +2,7 @@ use crate::vector::Vector;
 use crate::*;
 use num::{pow::Pow, Float};
 use std::fmt;
+use std::mem::swap;
 
 #[derive(Clone, Debug)]
 pub struct Matrix<K> {
@@ -27,6 +28,13 @@ where
 
     pub fn is_square(self) -> bool {
         self.n == self.m
+    }
+
+    pub fn transpose(&mut self) {
+        self.matrix = (0..self.n)
+            .map(|i| (0..self.m).map(|j| self.matrix[j][i]).collect())
+            .collect();
+        swap(&mut self.n, &mut self.m);
     }
 
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {

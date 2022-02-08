@@ -1,10 +1,11 @@
 use matrix::{matrix::Matrix, vector::Vector};
 
 fn main() {
-    let u = Vector::from([-1., 1.]);
-    let v = Vector::from([1., -1.]);
+    let mut u = Matrix::from([[1., 2.], [3., 4.]]);
 
-    println!("{}", u.dot(v.clone()));
+    println!("{}", u);
+    u.transpose();
+    println!("{}", u);
 }
 
 #[cfg(test)]
