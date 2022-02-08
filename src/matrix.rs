@@ -2,7 +2,6 @@ use crate::vector::Vector;
 use crate::*;
 use num::{pow::Pow, Float};
 use std::fmt;
-use std::mem::swap;
 
 #[derive(Clone, Debug)]
 pub struct Matrix<K> {
@@ -16,19 +15,16 @@ where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
     K: num::traits::Pow<f32> + std::fmt::Display,
 {
+    pub fn get(&self) -> Vec<Vec<K>> {
+        self.matrix.clone()
+    }
+
     pub fn shape(self) -> (usize, usize) {
         (self.n, self.m)
     }
 
     pub fn is_square(self) -> bool {
         self.n == self.m
-    }
-
-    pub fn transpose(&mut self) {
-        self.matrix = (0..self.n)
-            .map(|i| (0..self.m).map(|j| self.matrix[j][i]).collect())
-            .collect();
-        swap(&mut self.n, &mut self.m);
     }
 
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
@@ -43,8 +39,7 @@ where
     }
 
     pub fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
-        let mut mat = mat.clone();
-        mat.transpose();
+        let mut mat = mat.clone().transpose();
         mat.matrix = (0..self.n)
             .map(|row| {
                 (0..mat.m)
@@ -64,13 +59,21 @@ where
     pub fn trace(&mut self) -> K {
         (0..self.n).map(|idx| self.matrix[idx][idx]).sum()
     }
+
+    pub fn transpose(&mut self) -> Matrix<K> {
+        Matrix::from(
+            (0..self.n)
+                .map(|i| (0..self.m).map(|j| self.matrix[j][i]).collect())
+                .collect::<Vec<Vec<K>>>(),
+        )
+    }
+
+    pub fn row_echelon(&mut self) -> Matrix<K> {
+        todo!();
+    }
 }
 
 impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
-    fn get(&self) -> Vec<K> {
-        todo!();
-    }
-
     fn _add(&mut self, m: &Matrix<K>) {
         self.matrix = self
             .matrix

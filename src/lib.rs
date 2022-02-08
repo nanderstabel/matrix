@@ -12,7 +12,6 @@ pub trait Scalar<K>: Clone + Copy + Float + Sum<K> {}
 impl<K: Clone + Copy + Float + Sum<K>> Scalar<K> for K {}
 
 pub trait VectorSpace<V, K> {
-    fn get(&self) -> Vec<K>;
     fn _add(&mut self, v: &V);
     fn _sub(&mut self, v: &V);
     fn scl(&mut self, a: K);

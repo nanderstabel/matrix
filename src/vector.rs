@@ -13,6 +13,10 @@ where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
     K: num::traits::Pow<f32>,
 {
+    pub fn get(&self) -> Vec<K> {
+        self.vector.clone()
+    }
+
     pub fn size(self) -> usize {
         self.size
     }
@@ -56,10 +60,6 @@ where
 }
 
 impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
-    fn get(&self) -> Vec<K> {
-        self.vector.clone()
-    }
-
     fn _add(&mut self, v: &Vector<K>) {
         self.vector = self
             .vector
