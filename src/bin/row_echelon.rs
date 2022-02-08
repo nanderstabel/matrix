@@ -1,7 +1,7 @@
 use matrix::matrix::Matrix;
 
 fn main() {
-    let mut u = Matrix::from([[1., 2.], [3., 4.]]);
+    let mut u = Matrix::from([[1., 2., 0., 0.], [2., 4., 0., 0.], [-1., 2., 1., 1.]]);
     println!("{}", u);
     println!("{}", u.row_echelon());
 }

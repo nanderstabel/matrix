@@ -86,7 +86,7 @@ where
                     }
                 }
             }
-            for j in 0..res.m {
+            for j in 0..res.n {
                 let tmp = res.matrix[r][j];
                 res.matrix[r][j] = res.matrix[r][j];
                 res.matrix[r][j] = tmp;
@@ -142,7 +142,11 @@ where
     }
 
     pub fn rank(&mut self) -> usize {
-        todo!();
+        (self.clone().row_echelon())
+            .matrix
+            .iter()
+            .filter(|r| r.iter().filter(|&&n| n != 0.0 && n != -0.0).count() > 0)
+            .count()
     }
 }
 

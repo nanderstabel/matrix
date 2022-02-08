@@ -1,15 +1,9 @@
 use matrix::matrix::Matrix;
 
 fn main() {
-    let mut u = Matrix::from([
-        [-1., 2., 4., 6.],
-        [0., 0., 1., 7.],
-        [-1., 2., 4., 14.],
-        [0., 2., 4., 6.],
-    ]);
-    println!("{}", u);
+    let mut u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.], [21., 18., 7.]]);
+    println!("{}", u.row_echelon());
     println!("{}", u.rank());
-    println!("{}", u.trace());
 }
 
 #[cfg(test)]
