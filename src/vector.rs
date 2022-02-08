@@ -81,6 +81,10 @@ impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
     fn scl(&mut self, a: K) {
         self.vector = self.vector.iter().map(|&v| v * a).collect()
     }
+
+    fn inv_scl(&mut self, a: K) {
+        self.vector = self.vector.iter().map(|&v| v / a).collect()
+    }
 }
 
 impl<K: Scalar<K>> Add for Vector<K> {
@@ -107,6 +111,16 @@ impl Mul<f32> for Vector<f32> {
     type Output = Self;
 
     fn mul(self, f: f32) -> Self {
+        let mut res = self.clone();
+        res.scl(f);
+        res
+    }
+}
+
+impl<K: Scalar<K>> Div<K> for Vector<K> {
+    type Output = Self;
+
+    fn div(self, f: K) -> Self {
         let mut res = self.clone();
         res.scl(f);
         res

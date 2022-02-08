@@ -69,7 +69,45 @@ where
     }
 
     pub fn row_echelon(&mut self) -> Matrix<K> {
-        todo!();
+        let mut pivot = 0;
+        let mut res = self.clone();
+        for r in 0..res.m {
+            if res.n <= pivot {
+                return res;
+            }
+            let mut i = r;
+            while res.matrix[i][pivot] == 0. {
+                i += 1;
+                if i == res.m {
+                    i = r;
+                    pivot += 1;
+                    if pivot == res.n {
+                        return res;
+                    }
+                }
+            }
+            for j in 0..res.m {
+                let tmp = res.matrix[r][j];
+                res.matrix[r][j] = res.matrix[r][j];
+                res.matrix[r][j] = tmp;
+            }
+            let divisor = res.matrix[r][pivot];
+            if divisor != 0. {
+                for j in 0..res.n {
+                    res.matrix[r][j] = res.matrix[r][j] / divisor;
+                }
+            }
+            for j in 0..res.m {
+                if j != r {
+                    let hold = res.matrix[j][pivot];
+                    for k in 0..res.n {
+                        res.matrix[j][k] = res.matrix[j][k] - (hold * res.matrix[r][k]);
+                    }
+                }
+            }
+            pivot += 1;
+        }
+        res
     }
 }
 
@@ -97,6 +135,14 @@ impl<K: Scalar<K>> VectorSpace<Matrix<K>, K> for Matrix<K> {
             .matrix
             .iter()
             .map(|r| r.iter().map(|&v| v * a).collect())
+            .collect()
+    }
+
+    fn inv_scl(&mut self, a: K) {
+        self.matrix = self
+            .matrix
+            .iter()
+            .map(|r| r.iter().map(|&v| v / a).collect())
             .collect()
     }
 }
@@ -127,6 +173,16 @@ impl Mul<f32> for Matrix<f32> {
     fn mul(self, f: f32) -> Self {
         let mut res = self.clone();
         res.scl(f);
+        res
+    }
+}
+
+impl Div<f32> for Matrix<f32> {
+    type Output = Self;
+
+    fn div(self, f: f32) -> Self {
+        let mut res = self.clone();
+        res.inv_scl(f);
         res
     }
 }
