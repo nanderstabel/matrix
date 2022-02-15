@@ -140,8 +140,8 @@ where
     fn augmented(&mut self) -> Matrix<K> {
         let mut res = self.clone();
         for j in 0..self.m {
-            for i in 0..(self.n * 2) {
-                res.matrix[j].push(if j == 1 {
+            for i in 0..(self.n) {
+                res.matrix[j].push(if j == i {
                     <K as From<f32>>::from(1.)
                 } else {
                     <K as From<f32>>::from(0.)
@@ -149,6 +149,7 @@ where
             }
         }
         res.n *= 2;
+        println!("{}", res);
         res
     }
 
@@ -156,13 +157,14 @@ where
         if self.determinant() == 0.0 {
             return Err(anyhow!("Matrix is singular"));
         }
-        let reduced = self.augmented();
+        let reduced = self.augmented().row_echelon();
         let mut res = self.clone();
         for j in 0..res.m {
             for i in 0..res.n {
                 res.matrix[j][i] = reduced.matrix[j][i + res.n];
             }
         }
+        println!("{}", res);
         Ok(res)
     }
 
