@@ -2,7 +2,6 @@ use matrix::matrix::Matrix;
 
 fn main() {
     let mut u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.], [21., 18., 7.]]);
-    println!("{}", u.row_echelon());
     println!("{}", u.rank());
 }
 

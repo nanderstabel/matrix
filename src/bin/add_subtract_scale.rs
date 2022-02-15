@@ -1,8 +1,13 @@
-use matrix::matrix::Matrix;
-use matrix::{vector::Vector, VectorSpace};
+use matrix::{matrix::Matrix, vector::Vector, VectorSpace};
 
 #[allow(dead_code)]
-fn main() {}
+fn main() {
+    let mut u = Vector::from([2., 3.]);
+    let v = Vector::from([5., 7.]);
+    u._add(&v);
+    println!("{}", Vector::from([7., 10.]));
+    println!("{}", Vector::from([7., 10.]));
+}
 
 #[cfg(test)]
 mod add_subtract_scale {

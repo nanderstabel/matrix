@@ -11,13 +11,9 @@ where
 }
 
 fn main() {
-    let u = Vector::from([-1., 1.]);
-    let v = Vector::from([1., -1.]);
+    let u = Vector::from([2., 1.]);
+    let v = Vector::from([4., 2.]);
 
-    println!("{}", u.dot(v.clone()));
-    println!("{}", u.clone().norm());
-    println!("{}", v.clone().norm());
-    println!("{}", u.clone().norm() * v.clone().norm());
     println!("{}", angle_cos(&u, &v));
 }
 

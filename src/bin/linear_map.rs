@@ -1,11 +1,13 @@
 use matrix::{matrix::Matrix, vector::Vector};
 
 fn main() {
-    let mut u = Matrix::from([[1., 2.], [3., 4.]]);
+    let mut u = Matrix::from([[1., 0.], [0., 1.]]);
+    let v = Vector::from([4., 2.]);
+    println!("{}", u.mul_vec(&v));
 
-    println!("{}", u);
-    u.transpose();
-    println!("{}", u);
+    let mut u = Matrix::from([[1., 0.], [0., 1.]]);
+    let v = Matrix::from([[1., 0.], [0., 1.]]);
+    println!("{}", u.mul_mat(&v));
 }
 
 #[cfg(test)]

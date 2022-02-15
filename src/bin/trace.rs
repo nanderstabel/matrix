@@ -1,11 +1,8 @@
 use matrix::matrix::Matrix;
 
 fn main() {
-    let mut u = Matrix::from([[1., 2.], [3., 4.]]);
-
-    println!("{}", u);
-    u.transpose();
-    println!("{}", u);
+    let mut u = Matrix::from([[-2., -8., 4.], [1., -23., 4.], [0., 6., 4.]]);
+    println!("{}", u.trace());
 }
 
 #[cfg(test)]

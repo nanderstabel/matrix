@@ -1,5 +1,4 @@
 use matrix::vector::Vector;
-use std::ops::{Add, Mul, Sub};
 
 fn main() {
     let mut u = Vector::from([-5., -4., 4.]);

@@ -1,6 +1,14 @@
-use matrix::{vector::Vector, Scalar, VectorSpace};
+use matrix::{vector::Vector, Scalar};
+use num::pow::Pow;
+use std::iter::Sum;
 
-fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K> {
+fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K>
+where
+    f32: Sum<K>,
+    f32: From<K>,
+    f32: Sum<<K as Pow<f32>>::Output>,
+    K: Pow<f32>,
+{
     Vector::from([
         (u.get()[1] * v.get()[2]) - (u.get()[2] * v.get()[1]),
         (u.get()[2] * v.get()[0]) - (u.get()[0] * v.get()[2]),
@@ -9,13 +17,9 @@ fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K> {
 }
 
 fn main() {
-    let u = Vector::from([-1., 1.]);
-    let v = Vector::from([1., -1.]);
+    let u = Vector::from([1., 2., 3.]);
+    let v = Vector::from([4., 5., 6.]);
 
-    println!("{}", u.dot(v.clone()));
-    println!("{}", u.clone().norm());
-    println!("{}", v.clone().norm());
-    println!("{}", u.clone().norm() * v.clone().norm());
     println!("{}", cross_product(&u, &v));
 }
 
