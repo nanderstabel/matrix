@@ -1,6 +1,7 @@
 use crate::vector::Vector;
 use crate::*;
-use num::{pow::Pow, Float};
+use anyhow::{anyhow, Result};
+use num::{pow::Pow, Float, NumCast};
 use std::fmt;
 
 #[derive(Clone, Debug)]
@@ -13,7 +14,7 @@ pub struct Matrix<K> {
 impl<K: Scalar<K> + Float> Matrix<K>
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32> + std::fmt::Display,
+    K: num::traits::Pow<f32> + std::fmt::Display + NumCast,
 {
     pub fn get(&self) -> Vec<Vec<K>> {
         self.matrix.clone()
@@ -136,9 +137,33 @@ where
         }
     }
 
-    // pub fn inverse(&mut self) -> Result<Matrix<K>> {
-    pub fn inverse(&mut self) -> Matrix<K> {
-        todo!();
+    fn augmented(&mut self) -> Matrix<K> {
+        let mut res = self.clone();
+        for j in 0..self.m {
+            for i in 0..(self.n * 2) {
+                res.matrix[j].push(if j == 1 {
+                    <K as From<f32>>::from(1.)
+                } else {
+                    <K as From<f32>>::from(0.)
+                });
+            }
+        }
+        res.n *= 2;
+        res
+    }
+
+    pub fn inverse(&mut self) -> Result<Matrix<K>> {
+        if self.determinant() == 0.0 {
+            return Err(anyhow!("Matrix is singular"));
+        }
+        let reduced = self.augmented();
+        let mut res = self.clone();
+        for j in 0..res.m {
+            for i in 0..res.n {
+                res.matrix[j][i] = reduced.matrix[j][i + res.n];
+            }
+        }
+        Ok(res)
     }
 
     pub fn rank(&mut self) -> usize {

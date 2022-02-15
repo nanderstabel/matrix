@@ -1,15 +1,16 @@
 use matrix::matrix::Matrix;
 
 fn main() {
-    let mut u = Matrix::from([
-        [-1., 2., 4., 6.],
-        [0., 0., 1., 7.],
-        [-1., 2., 4., 14.],
-        [0., 2., 4., 6.],
-    ]);
-    println!("{}", u);
-    println!("{}", u.inverse());
-    println!("{}", u.trace());
+    // let mut u = Matrix::from([
+    //     [-1., 2., 4., 6.],
+    //     [0., 0., 1., 7.],
+    //     [-1., 2., 4., 14.],
+    //     [0., 2., 4., 6.],
+    // ]);
+    let mut u = Matrix::from([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]);
+    if let Ok(inverse) = u.inverse() {
+        println!("{}", inverse);
+    }
 }
 
 #[cfg(test)]
