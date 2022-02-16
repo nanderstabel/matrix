@@ -11,9 +11,7 @@ where
 fn main() {
     let m1 = Matrix::from([[2., 1.], [3., 4.]]);
     let m2 = Matrix::from([[20., 10.], [30., 40.]]);
-
     let m3 = lerp(m1, m2, 0.5);
-
     println!("{}", m3);
 }
 

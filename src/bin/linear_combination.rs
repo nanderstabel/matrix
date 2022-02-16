@@ -17,7 +17,7 @@ where
         }
         return res;
     }
-    todo!();
+    u[0].clone()
 }
 
 fn main() {

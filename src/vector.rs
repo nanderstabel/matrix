@@ -33,7 +33,7 @@ where
         self.vector
             .clone()
             .into_iter()
-            .map(|i| if i > -i { i } else { -i })
+            .map(|i| i.abs())
             .sum::<f32>()
             .into()
     }

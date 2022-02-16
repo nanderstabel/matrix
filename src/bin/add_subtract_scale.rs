@@ -5,8 +5,7 @@ fn main() {
     let mut u = Vector::from([2., 3.]);
     let v = Vector::from([5., 7.]);
     u._add(&v);
-    println!("{}", Vector::from([7., 10.]));
-    println!("{}", Vector::from([7., 10.]));
+    println!("{}", u);
 }
 
 #[cfg(test)]

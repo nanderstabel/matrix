@@ -3,6 +3,8 @@ use matrix::vector::Vector;
 fn main() {
     let mut u = Vector::from([-5., -4., 4.]);
 
+    println!("{}", u.norm_1());
+    println!("{}", u.norm());
     println!("{}", u.norm_inf());
 }
 
