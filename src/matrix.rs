@@ -14,7 +14,11 @@ pub struct Matrix<K> {
 impl<K: Scalar<K> + Float> Matrix<K>
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32> + std::fmt::Display + NumCast,
+    K: num::traits::Pow<f32>
+        + std::fmt::Display
+        + NumCast
+        + std::ops::SubAssign
+        + std::ops::MulAssign,
 {
     pub fn get(&self) -> Vec<Vec<K>> {
         self.matrix.clone()
@@ -69,7 +73,43 @@ where
         )
     }
 
-    pub fn row_echelon(&mut self) -> Matrix<K> {
+    fn row_echelon(&mut self) -> Matrix<K> {
+        let (nrows, ncols) = self.shape();
+        let (mut pivot_row, mut pivot_col) = (0, 0);
+        let mut res = self.clone();
+        while pivot_row < nrows - 1 && pivot_col < ncols - 1 {
+            let mut max: K = <K as From<f32>>::from(f32::MIN);
+            let mut i_max = 0;
+            for i in pivot_row..nrows {
+                if res.matrix[i][pivot_col].abs() > max {
+                    max = res.matrix[i][pivot_col];
+                    i_max = i;
+                }
+            }
+            if res.matrix[i_max][pivot_col] == 0. {
+                pivot_col += 1;
+            } else {
+                for j in 0..res.m {
+                    let tmp = res.matrix[i_max][j];
+                    res.matrix[i_max][j] = res.matrix[pivot_row][j];
+                    res.matrix[pivot_row][j] = tmp;
+                }
+                for i in (pivot_row + 1)..nrows {
+                    let ratio: K = res.matrix[i][pivot_col] / res.matrix[pivot_row][pivot_col];
+                    res.matrix[i][pivot_col] = <K as From<f32>>::from(0.);
+                    for j in (pivot_row + 1)..ncols {
+                        let tmp = res.matrix[pivot_row][j] * ratio;
+                        res.matrix[i][j] -= tmp;
+                    }
+                }
+                pivot_row += 1;
+                pivot_col += 1;
+            }
+        }
+        res
+    }
+
+    pub fn reduced_row_echelon(&mut self) -> Matrix<K> {
         let mut pivot = 0;
         let mut res = self.clone();
         for r in 0..res.m {
@@ -122,18 +162,19 @@ where
     }
 
     fn dim4_determinant(&self) -> K {
-        todo!();
-        let mut clone = self.clone();
-        clone.row_echelon();
-        clone.matrix[0][0] * clone.matrix[1][1] * clone.matrix[2][2] * clone.matrix[3][3]
+        let mut determinant = <K as From<f32>>::from(1.);
+        let res = self.clone().row_echelon();
+        for i in 0..res.n {
+            determinant *= res.matrix[i][i];
+        }
+        determinant
     }
 
     pub fn determinant(&mut self) -> K {
         match self.shape() {
             (2, 2) => self.dim2_determinant(self.get()),
             (3, 3) => self.dim3_determinant(self.get()),
-            (4, 4) => self.dim4_determinant(),
-            _ => panic!(),
+            _ => self.dim4_determinant(),
         }
     }
 
@@ -157,7 +198,7 @@ where
         if self.determinant() == 0.0 {
             return Err(anyhow!("Matrix is singular"));
         }
-        let reduced = self.augmented().row_echelon();
+        let reduced = self.augmented().reduced_row_echelon();
         let mut res = self.clone();
         for j in 0..res.m {
             for i in 0..res.n {
@@ -169,7 +210,7 @@ where
     }
 
     pub fn rank(&mut self) -> usize {
-        (self.clone().row_echelon())
+        (self.clone().reduced_row_echelon())
             .matrix
             .iter()
             .filter(|r| r.iter().filter(|&&n| n != 0.0 && n != -0.0).count() > 0)
