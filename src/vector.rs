@@ -35,7 +35,6 @@ where
             .into_iter()
             .map(|i| i.abs())
             .sum::<f32>()
-            .into()
     }
 
     pub fn norm(&mut self) -> f32 {
@@ -45,7 +44,6 @@ where
             .map(|i| i.pow(2.))
             .sum::<f32>()
             .sqrt()
-            .into()
     }
 
     pub fn norm_inf(&mut self) -> f32 {
@@ -91,7 +89,7 @@ impl<K: Scalar<K>> Add for Vector<K> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res._add(&other);
         res
     }
@@ -101,7 +99,7 @@ impl<K: Scalar<K>> Sub for Vector<K> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res._sub(&other);
         res
     }
@@ -111,7 +109,7 @@ impl Mul<f32> for Vector<f32> {
     type Output = Self;
 
     fn mul(self, f: f32) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res.scl(f);
         res
     }
@@ -121,7 +119,7 @@ impl<K: Scalar<K>> Div<K> for Vector<K> {
     type Output = Self;
 
     fn div(self, f: K) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res.scl(f);
         res
     }
@@ -154,15 +152,3 @@ impl<K: std::fmt::Debug> fmt::Display for Vector<K> {
         write!(f, "{:?}", self.vector)
     }
 }
-
-// #[cfg(test)]
-// mod vector {
-//     use super::*;
-
-//     #[test]
-//     fn size() {
-//         assert_eq!(Vector::<i32>::from([]).size(), 0);
-//         assert_eq!(Vector::from([1]).size(), 1);
-//         assert_eq!(Vector::from([3, 4]).size(), 2);
-//     }
-// }

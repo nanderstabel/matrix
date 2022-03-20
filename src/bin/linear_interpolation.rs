@@ -1,11 +1,12 @@
-use matrix::{matrix::Matrix, vector::Vector};
+use matrix::matrix::Matrix;
+use matrix::vector::Vector;
 use std::ops::{Add, Mul, Sub};
 
 fn lerp<V>(u: V, v: V, t: f32) -> V
 where
     V: Clone + Mul<f32, Output = V> + Add<Output = V> + Sub<Output = V>,
 {
-    u.clone() + (v - u.clone()) * t
+    u.clone() + (v - u) * t
 }
 
 fn main() {

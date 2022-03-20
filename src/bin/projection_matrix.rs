@@ -15,5 +15,5 @@ fn projection(fov: f32, ratio: f32, near: f32, far: f32) -> Matrix<f32> {
 }
 
 fn main() {
-    println!("{}", projection(45., 30. / 40., 25., 300.));
+    print!("{}", projection(45., 30. / 40., 25., 300.));
 }

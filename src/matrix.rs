@@ -127,11 +127,6 @@ where
                     }
                 }
             }
-            for j in 0..res.n {
-                let tmp = res.matrix[r][j];
-                res.matrix[r][j] = res.matrix[r][j];
-                res.matrix[r][j] = tmp;
-            }
             let divisor = res.matrix[r][pivot];
             if divisor != 0. {
                 for j in 0..res.n {
@@ -258,7 +253,7 @@ impl<K: Scalar<K>> Add for Matrix<K> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res._add(&other);
         res
     }
@@ -268,7 +263,7 @@ impl<K: Scalar<K>> Sub for Matrix<K> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res._sub(&other);
         res
     }
@@ -278,7 +273,7 @@ impl Mul<f32> for Matrix<f32> {
     type Output = Self;
 
     fn mul(self, f: f32) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res.scl(f);
         res
     }
@@ -288,7 +283,7 @@ impl Div<f32> for Matrix<f32> {
     type Output = Self;
 
     fn div(self, f: f32) -> Self {
-        let mut res = self.clone();
+        let mut res = self;
         res.inv_scl(f);
         res
     }
@@ -308,12 +303,12 @@ impl<K: Scalar<K>> Matrix<K> {
             .collect();
         Matrix {
             n: matrix[0].len(),
-            m: if matrix[0].len() == 0 {
+            m: if matrix[0].is_empty() {
                 0
             } else {
                 matrix.len()
             },
-            matrix: matrix,
+            matrix,
         }
     }
 }
@@ -336,7 +331,7 @@ impl<K: fmt::Display + Clone> fmt::Display for Matrix<K> {
                 for i in 0..(self.n - 1) {
                     write!(f, "{}, ", self.matrix[j][i])?;
                 }
-                write!(f, "{}]\n", self.matrix[j][self.n - 1])?;
+                writeln!(f, "{}]", self.matrix[j][self.n - 1])?;
             }
         }
         Ok(())

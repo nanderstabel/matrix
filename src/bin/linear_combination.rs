@@ -10,7 +10,7 @@ where
     if let Some(v) = iter.next() {
         let mut res = v.clone();
         res.scl(*coefs.next().unwrap());
-        while let Some(v) = iter.next() {
+        for v in iter {
             let mut add = v.clone();
             add.scl(*coefs.next().unwrap());
             res._add(&add);
