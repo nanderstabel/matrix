@@ -5,6 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+# RUSTFLAGS="-C target-feature=+fma" cargo run --bin linear_combination
+
 [dependencies]
 num = "0.x"
 anyhow = "1.x"
+itertools = "0.10.5"
+safe_arch = { version = "0.6.0" }
