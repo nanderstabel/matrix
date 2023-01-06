@@ -75,7 +75,7 @@ where
                 .map(|_| {
                     iters
                         .iter_mut()
-                        .map(|n| n.next().unwrap().clone())
+                        .map(|n| *n.next().unwrap())
                         .collect::<Vector<K>>()
                 })
                 .collect::<Vec<Vector<K>>>()
@@ -313,10 +313,13 @@ impl Mul<f32> for Matrix<f32> {
     }
 }
 
-impl<K: Scalar<K> + std::convert::From<f32>> MulAssign<f32> for Matrix<K> {
+impl<K: Scalar<K> + std::convert::From<f32>> MulAssign<f32> for Matrix<K>
+where
+    Vector<K>: std::ops::MulAssign<f32>,
+{
     fn mul_assign(&mut self, rhs: f32) {
         self.matrix.iter_mut().for_each(|u| {
-            *u *= rhs.into();
+            *u *= rhs;
         });
     }
 }
@@ -400,7 +403,7 @@ impl<K: Scalar<K>> fmt::Display for Matrix<K> {
             write!(f, "[]")?;
         } else {
             self.matrix.iter().for_each(|u| {
-                write!(f, "{}\n", u).unwrap();
+                writeln!(f, "{}", u).unwrap();
             })
         }
         Ok(())

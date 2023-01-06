@@ -4,13 +4,10 @@ use num::{pow::Pow, traits::MulAdd, Float};
 use std::ops::Deref;
 use std::{array::IntoIter, fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
 
-use safe_arch::fused_mul_add_m256;
-use safe_arch::m256;
-
 #[derive(Clone, Debug)]
 pub struct Vector<K> {
     pub size: usize,
-    pub vector: m256,
+    pub vector: Vec<K>,
 }
 
 impl<K: Scalar<K>> Deref for Vector<K> {
@@ -21,10 +18,13 @@ impl<K: Scalar<K>> Deref for Vector<K> {
     }
 }
 
+use safe_arch::fused_mul_add_m256;
+use safe_arch::m256;
+
 impl<K: Scalar<K> + Float> Vector<K>
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32>,
+    K: num::traits::Pow<f32> + std::convert::From<f32>,
 {
     pub fn get(&self) -> Vec<K> {
         self.vector.clone()
@@ -35,12 +35,32 @@ where
     }
 
     pub fn dot(&self, v: Vector<K>) -> K {
-        self.vector
+        let res = self
+            .vector
             .iter()
             .zip(v.vector.iter())
-            .map(|(&u, &ve)| u * ve)
-            .sum()
+            .map(|(&u, &v)| {
+                let mut u_arr = [0.0f32; 8];
+                let mut v_arr = [0.0f32; 8];
+
+                u_arr[0] = u.into();
+                v_arr[0] = v.into();
+
+                (m256::from(u_arr), m256::from(v_arr))
+            })
+            .fold(Default::default(), |c, (a, b)| fused_mul_add_m256(a, b, c));
+
+        dbg!(&res);
+        Vector::from_m256(res, 1).vector[0]
     }
+
+    // pub fn dot(&self, v: Vector<K>) -> K {
+    //     self.vector
+    //         .iter()
+    //         .zip(v.vector.iter())
+    //         .map(|(&u, &ve)| u * ve)
+    //         .sum()
+    // }
 
     pub fn norm_1(&mut self) -> f32 {
         self.vector
@@ -67,6 +87,15 @@ where
             .unwrap()
             .abs()
             .into()
+    }
+
+    pub fn from_m256(m: m256, size: usize) -> Vector<K> {
+        let arr = m.to_array();
+        let mut vector = vec![];
+        (0..size).for_each(|i| {
+            vector.push(arr[i].into());
+        });
+        Vector { size, vector }
     }
 }
 
@@ -144,8 +173,29 @@ impl<K: Scalar<K> + std::convert::From<K>> Mul<K> for Vector<K> {
 impl<K: Scalar<K> + std::convert::From<K>> MulAssign<K> for Vector<K> {
     fn mul_assign(&mut self, rhs: K) {
         self.vector.iter_mut().for_each(|u| {
-            *u *= rhs.into();
+            *u *= rhs;
         });
+    }
+}
+
+impl<K: Scalar<K> + std::convert::From<K>> Mul<Vector<K>> for Vector<K> {
+    type Output = Self;
+
+    fn mul(self, f: Vector<K>) -> Self::Output {
+        let mut res = self;
+        res.mul_assign(f);
+        res
+    }
+}
+
+impl<K: Scalar<K> + std::convert::From<K>> MulAssign<Vector<K>> for Vector<K> {
+    fn mul_assign(&mut self, rhs: Vector<K>) {
+        self.vector
+            .iter_mut()
+            .zip_eq(rhs.iter())
+            .for_each(|(u, v)| {
+                *u *= *v;
+            });
     }
 }
 
@@ -162,13 +212,9 @@ impl<K: Scalar<K> + std::convert::From<K>> MulAssign<K> for Vector<K> {
 impl<K: Scalar<K>, const N: usize> From<[K; N]> for Vector<K> {
     fn from(v: [K; N]) -> Self {
         let size = v.len();
-        let mut arr = [0.f32; 8];
-        (0..size).for_each(|e| {
-            arr[e] = v[e].into();
-        });
         Vector {
             size,
-            vector: m256::from_array(arr),
+            vector: v.to_vec(),
         }
     }
 }
