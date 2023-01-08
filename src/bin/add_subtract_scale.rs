@@ -1,7 +1,12 @@
 use matrix::{matrix::Matrix, vector::Vector};
 
 #[allow(dead_code)]
-fn main() {}
+fn main() {
+    let mut u = Vector::from([2., 3.]);
+    let v = Vector::from([5., 7.]);
+    u += v;
+    println!("{}\n", u);
+}
 
 #[cfg(test)]
 mod add_subtract_scale {
@@ -13,7 +18,6 @@ mod add_subtract_scale {
         let v = Vector::from([5., 7.]);
         u += v;
         assert_eq!(u, Vector::from([7., 10.]));
-        // println!("{}\n", u);
     }
 
     #[test]
@@ -22,7 +26,6 @@ mod add_subtract_scale {
         let v = Vector::from([5., 7.]);
         u -= v;
         assert_eq!(u, Vector::from([-3., -4.]));
-        // println!("{}\n", u);
     }
 
     #[test]
@@ -30,7 +33,6 @@ mod add_subtract_scale {
         let mut u = Vector::<f32>::from([2., 3.]);
         u *= 2.;
         assert_eq!(u, Vector::from([4.0, 6.0]));
-        // println!("{}\n", u);
     }
 
     #[test]
@@ -39,7 +41,6 @@ mod add_subtract_scale {
         let v = Matrix::from([[7., 4.], [-2., 2.]]);
         u += v;
         assert_eq!(u, Matrix::from([[8., 6.], [1., 6.]]));
-        // println!("{}\n", u);
     }
 
     #[test]
@@ -56,6 +57,5 @@ mod add_subtract_scale {
         let mut u = Matrix::from([[1., 2.], [3., 4.]]);
         u *= 2.;
         assert_eq!(u, Matrix::from([[2., 4.], [6., 8.]]));
-        // println!("{}\n", u);
     }
 }

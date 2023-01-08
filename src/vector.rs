@@ -1,12 +1,13 @@
 use crate::*;
 use itertools::Itertools;
-use num::{pow::Pow, traits::MulAdd, Float};
+use num::{pow::Pow, Float};
 use std::ops::{Deref, RangeFrom, RangeTo};
-use std::{array::IntoIter, fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
+use std::ops::{Index, IndexMut};
+use std::{fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
 
 #[derive(Clone, Debug, Default)]
 pub struct Vector<K> {
-    pub size: usize,
+    size: usize,
     pub vector: Vec<K>,
 }
 
@@ -18,84 +19,38 @@ impl<K: Scalar<K>> Deref for Vector<K> {
     }
 }
 
-use safe_arch::fused_mul_add_m256;
-use safe_arch::m256;
-
 impl<K: Scalar<K> + Float> Vector<K>
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
     K: num::traits::Pow<f32> + std::convert::From<f32>,
 {
-    pub fn get(&self) -> Vec<K> {
-        self.vector.clone()
-    }
-
     pub fn size(&self) -> usize {
         self.size
     }
 
     pub fn dot(&self, v: Vector<K>) -> K {
-        let res = self
-            .vector
+        self.vector
             .iter()
-            .zip(v.vector.iter())
-            .map(|(&u, &v)| {
-                let mut u_arr = [0.0f32; 8];
-                let mut v_arr = [0.0f32; 8];
-
-                u_arr[0] = u.into();
-                v_arr[0] = v.into();
-
-                (m256::from(u_arr), m256::from(v_arr))
-            })
-            .fold(Default::default(), |c, (a, b)| fused_mul_add_m256(a, b, c));
-
-        dbg!(&res);
-        Vector::from_m256(res, 1).vector[0]
+            .zip_eq(v.vector.iter())
+            .map(|(u, v)| *u * *v)
+            .sum()
     }
 
-    // pub fn dot(&self, v: Vector<K>) -> K {
-    //     self.vector
-    //         .iter()
-    //         .zip(v.vector.iter())
-    //         .map(|(&u, &ve)| u * ve)
-    //         .sum()
-    // }
-
     pub fn norm_1(&mut self) -> f32 {
-        self.vector
-            .clone()
-            .into_iter()
-            .map(|i| i.abs())
-            .sum::<f32>()
+        self.vector.iter().map(|i| i.abs()).sum::<f32>()
     }
 
     pub fn norm(&mut self) -> f32 {
-        self.vector
-            .clone()
-            .into_iter()
-            .map(|i| i.pow(2.))
-            .sum::<f32>()
-            .sqrt()
+        self.vector.iter().map(|i| i.pow(2.)).sum::<f32>().sqrt()
     }
 
     pub fn norm_inf(&mut self) -> f32 {
         self.vector
-            .clone()
-            .into_iter()
+            .iter()
             .min_by(|a, b| b.abs().partial_cmp(&a.abs()).unwrap())
             .unwrap()
             .abs()
             .into()
-    }
-
-    pub fn from_m256(m: m256, size: usize) -> Vector<K> {
-        let arr = m.to_array();
-        let mut vector = vec![];
-        (0..size).for_each(|i| {
-            vector.push(arr[i].into());
-        });
-        Vector { size, vector }
     }
 }
 
@@ -225,10 +180,18 @@ impl<K: Scalar<K>, const N: usize> From<[K; N]> for Vector<K> {
 
 impl<K: Scalar<K>> From<&[K]> for Vector<K> {
     fn from(v: &[K]) -> Self {
-        let size = v.len();
         Vector {
-            size,
+            size: v.len(),
             vector: v.to_vec(),
+        }
+    }
+}
+
+impl<K: Scalar<K>> From<Vec<K>> for Vector<K> {
+    fn from(v: Vec<K>) -> Self {
+        Vector {
+            size: v.len(),
+            vector: v,
         }
     }
 }
@@ -265,8 +228,6 @@ impl<K: Scalar<K>> FromIterator<K> for Vector<K> {
         }
     }
 }
-
-use std::ops::{Index, IndexMut};
 
 impl<K: Scalar<K>> Index<usize> for Vector<K> {
     type Output = K;

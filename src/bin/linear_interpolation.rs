@@ -1,4 +1,4 @@
-use matrix::{matrix::Matrix, vector::Vector};
+use matrix::matrix::Matrix;
 use std::ops::{Add, Mul, Sub};
 
 fn lerp<V>(u: V, v: V, t: f32) -> V

@@ -35,14 +35,12 @@ where
     //     }
 
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
-        Vector {
-            size: self.m,
-            vector: self
-                .matrix
+        Vector::from(
+            self.matrix
                 .iter()
                 .map(|v| (v.clone() * vec.clone()).vector.into_iter().sum::<K>())
                 .collect_vec(),
-        }
+        )
     }
 
     pub fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {

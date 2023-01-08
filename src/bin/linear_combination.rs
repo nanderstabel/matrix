@@ -1,36 +1,13 @@
-use itertools::Itertools;
-use matrix::{vector::Vector, Scalar};
+use matrix::{matrix::Matrix, vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
-
-use safe_arch::fused_mul_add_m256;
-use safe_arch::m256;
 
 fn linear_combination<K>(u: &[Vector<K>], coefs: &[K]) -> Vector<K>
 where
     K: Scalar<K> + Pow<f32> + std::fmt::Display + From<f32>,
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
 {
-    let res = u
-        .iter()
-        .zip_eq(coefs.iter())
-        .map(|(e, c)| {
-            let mut e_arr = [0.0f32; 8];
-            let mut c_arr = [0.0f32; 8];
-            e_arr
-                .iter_mut()
-                .zip_eq(c_arr.iter_mut())
-                .zip(e.iter())
-                .for_each(|((e_b, c_b), e)| {
-                    *e_b = (*e).into();
-                    *c_b = (*c).into();
-                });
-
-            (m256::from(e_arr), m256::from(c_arr))
-        })
-        .fold(Default::default(), |c, (a, b)| fused_mul_add_m256(a, b, c));
-
-    Vector::from_m256(res, u[0].size)
+    Matrix::from(u).transpose().mul_vec(&coefs.into())
 }
 
 fn main() {
