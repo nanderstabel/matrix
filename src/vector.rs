@@ -1,22 +1,17 @@
 use crate::*;
+use derive_more::{Deref, DerefMut, Index, IndexMut};
 use itertools::Itertools;
 use num::{pow::Pow, Float};
-use std::ops::{Deref, RangeFrom, RangeTo};
-use std::ops::{Index, IndexMut};
 use std::{fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut)]
 pub struct Vector<K> {
     size: usize,
+    #[deref]
+    #[deref_mut]
+    #[index]
+    #[index_mut]
     pub vector: Vec<K>,
-}
-
-impl<K: Scalar<K>> Deref for Vector<K> {
-    type Target = Vec<K>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.vector
-    }
 }
 
 impl<K: Scalar<K> + Float> Vector<K>
@@ -29,24 +24,19 @@ where
     }
 
     pub fn dot(&self, v: Vector<K>) -> K {
-        self.vector
-            .iter()
-            .zip_eq(v.vector.iter())
-            .map(|(u, v)| *u * *v)
-            .sum()
+        self.iter().zip_eq(v.iter()).map(|(u, v)| *u * *v).sum()
     }
 
     pub fn norm_1(&mut self) -> f32 {
-        self.vector.iter().map(|i| i.abs()).sum::<f32>()
+        self.iter().map(|i| i.abs()).sum::<f32>()
     }
 
     pub fn norm(&mut self) -> f32 {
-        self.vector.iter().map(|i| i.pow(2.)).sum::<f32>().sqrt()
+        self.iter().map(|i| i.pow(2.)).sum::<f32>().sqrt()
     }
 
     pub fn norm_inf(&mut self) -> f32 {
-        self.vector
-            .iter()
+        self.iter()
             .min_by(|a, b| b.abs().partial_cmp(&a.abs()).unwrap())
             .unwrap()
             .abs()
@@ -89,12 +79,9 @@ impl<K: Scalar<K>> AddAssign for Vector<K> {
             *self = rhs;
             return;
         }
-        self.vector
-            .iter_mut()
-            .zip_eq(rhs.vector.iter())
-            .for_each(|(u, v)| {
-                *u += *v;
-            });
+        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
+            *u += *v;
+        });
     }
 }
 
@@ -110,12 +97,9 @@ impl<K: Scalar<K>> Sub for Vector<K> {
 
 impl<K: Scalar<K>> SubAssign for Vector<K> {
     fn sub_assign(&mut self, rhs: Self) {
-        self.vector
-            .iter_mut()
-            .zip_eq(rhs.vector.iter())
-            .for_each(|(u, v)| {
-                *u -= *v;
-            });
+        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
+            *u -= *v;
+        });
     }
 }
 
@@ -131,7 +115,7 @@ impl<K: Scalar<K> + std::convert::From<K>> Mul<K> for Vector<K> {
 
 impl<K: Scalar<K> + std::convert::From<K>> MulAssign<K> for Vector<K> {
     fn mul_assign(&mut self, rhs: K) {
-        self.vector.iter_mut().for_each(|u| {
+        self.iter_mut().for_each(|u| {
             *u *= rhs;
         });
     }
@@ -149,49 +133,18 @@ impl<K: Scalar<K> + std::convert::From<K>> Mul<Vector<K>> for Vector<K> {
 
 impl<K: Scalar<K> + std::convert::From<K>> MulAssign<Vector<K>> for Vector<K> {
     fn mul_assign(&mut self, rhs: Vector<K>) {
-        self.vector
-            .iter_mut()
-            .zip_eq(rhs.iter())
-            .for_each(|(u, v)| {
-                *u *= *v;
-            });
+        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
+            *u *= *v;
+        });
     }
 }
 
-// impl<K: Scalar<K>> Div<K> for Vector<K> {
-//     type Output = Self;
-
-//     fn div(self, f: K) -> Self {
-//         let mut res = self;
-//         res.scl(f);
-//         res
-//     }
-// }
-
-impl<K: Scalar<K>, const N: usize> From<[K; N]> for Vector<K> {
-    fn from(v: [K; N]) -> Self {
-        let size = v.len();
+impl<T: Into<Vec<K>>, K: Scalar<K>> From<T> for Vector<K> {
+    fn from(v: T) -> Self {
+        let vector = v.into();
         Vector {
-            size,
-            vector: v.to_vec(),
-        }
-    }
-}
-
-impl<K: Scalar<K>> From<&[K]> for Vector<K> {
-    fn from(v: &[K]) -> Self {
-        Vector {
-            size: v.len(),
-            vector: v.to_vec(),
-        }
-    }
-}
-
-impl<K: Scalar<K>> From<Vec<K>> for Vector<K> {
-    fn from(v: Vec<K>) -> Self {
-        Vector {
-            size: v.len(),
-            vector: v,
+            size: vector.len(),
+            vector,
         }
     }
 }
@@ -210,15 +163,6 @@ impl<K: std::fmt::Debug> fmt::Display for Vector<K> {
     }
 }
 
-impl<K: Scalar<K>> IntoIterator for Vector<K> {
-    type Item = K;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.vector.into_iter()
-    }
-}
-
 impl<K: Scalar<K>> FromIterator<K> for Vector<K> {
     fn from_iter<T: IntoIterator<Item = K>>(iter: T) -> Self {
         let vector: Vec<K> = iter.into_iter().collect();
@@ -226,35 +170,5 @@ impl<K: Scalar<K>> FromIterator<K> for Vector<K> {
             size: vector.len(),
             vector,
         }
-    }
-}
-
-impl<K: Scalar<K>> Index<usize> for Vector<K> {
-    type Output = K;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.vector[index]
-    }
-}
-
-impl<K: Scalar<K>> IndexMut<usize> for Vector<K> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.vector[index]
-    }
-}
-
-impl<K: Scalar<K>> Index<RangeFrom<usize>> for Vector<K> {
-    type Output = [K];
-
-    fn index(&self, range: RangeFrom<usize>) -> &Self::Output {
-        &self.vector[range]
-    }
-}
-
-impl<K: Scalar<K>> Index<RangeTo<usize>> for Vector<K> {
-    type Output = [K];
-
-    fn index(&self, range: RangeTo<usize>) -> &Self::Output {
-        &self.vector[range]
     }
 }

@@ -18,6 +18,7 @@ fn main() {
 #[cfg(test)]
 mod lerp {
     use super::*;
+    use matrix::vector::Vector;
 
     #[test]
     fn vector_lerp() {
