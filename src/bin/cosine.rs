@@ -20,27 +20,28 @@ fn main() {
 #[cfg(test)]
 mod cosine {
     use super::*;
+    use float_cmp::*;
 
     #[test]
     fn vector_cosine() {
         let u = Vector::from([1., 0.]);
         let v = Vector::from([1., 0.]);
-        assert_eq!(angle_cos(&u, &v), 1.);
+        assert_approx_eq!(f32, angle_cos(&u, &v), 1., epsilon = f32::EPSILON);
 
         let u = Vector::from([1., 0.]);
         let v = Vector::from([0., 1.]);
-        assert_eq!(angle_cos(&u, &v), 0.);
+        assert_approx_eq!(f32, angle_cos(&u, &v), 0., epsilon = f32::EPSILON);
 
         let u = Vector::from([-1., 1.]);
         let v = Vector::from([1., -1.]);
-        assert_eq!(angle_cos(&u, &v), -1.0000001);
+        assert_approx_eq!(f32, angle_cos(&u, &v), -1., epsilon = f32::EPSILON);
 
         let u = Vector::from([2., 1.]);
         let v = Vector::from([4., 2.]);
-        assert_eq!(angle_cos(&u, &v), 1.);
+        assert_approx_eq!(f32, angle_cos(&u, &v), 1., epsilon = f32::EPSILON);
 
         let u = Vector::from([1., 2., 3.]);
         let v = Vector::from([4., 5., 6.]);
-        assert_eq!(angle_cos(&u, &v), 0.9746318);
+        assert_approx_eq!(f32, angle_cos(&u, &v), 0.9746318, epsilon = f32::EPSILON);
     }
 }

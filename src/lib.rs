@@ -19,8 +19,10 @@ pub trait Scalar<K>:
     + AddAssign<K>
     + SubAssign<K>
     + MulAssign<K>
+    + Default
 {
 }
+
 impl<
         K: From<f32>
             + PartialEq<f32>
@@ -32,7 +34,8 @@ impl<
             + Sum<K>
             + AddAssign<K>
             + SubAssign<K>
-            + MulAssign<K>,
+            + MulAssign<K>
+            + Default,
     > Scalar<K> for K
 {
 }

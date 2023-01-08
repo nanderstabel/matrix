@@ -1,10 +1,10 @@
 use crate::*;
 use itertools::Itertools;
 use num::{pow::Pow, traits::MulAdd, Float};
-use std::ops::Deref;
+use std::ops::{Deref, RangeFrom, RangeTo};
 use std::{array::IntoIter, fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Vector<K> {
     pub size: usize,
     pub vector: Vec<K>,
@@ -130,6 +130,10 @@ impl<K: Scalar<K>> Add for Vector<K> {
 
 impl<K: Scalar<K>> AddAssign for Vector<K> {
     fn add_assign(&mut self, rhs: Self) {
+        if self.size == 0 {
+            *self = rhs;
+            return;
+        }
         self.vector
             .iter_mut()
             .zip_eq(rhs.vector.iter())
@@ -219,6 +223,16 @@ impl<K: Scalar<K>, const N: usize> From<[K; N]> for Vector<K> {
     }
 }
 
+impl<K: Scalar<K>> From<&[K]> for Vector<K> {
+    fn from(v: &[K]) -> Self {
+        let size = v.len();
+        Vector {
+            size,
+            vector: v.to_vec(),
+        }
+    }
+}
+
 impl<K: Clone + PartialEq> PartialEq for Vector<K> {
     fn eq(&self, other: &Self) -> bool {
         self.vector == other.vector
@@ -249,5 +263,37 @@ impl<K: Scalar<K>> FromIterator<K> for Vector<K> {
             size: vector.len(),
             vector,
         }
+    }
+}
+
+use std::ops::{Index, IndexMut};
+
+impl<K: Scalar<K>> Index<usize> for Vector<K> {
+    type Output = K;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.vector[index]
+    }
+}
+
+impl<K: Scalar<K>> IndexMut<usize> for Vector<K> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.vector[index]
+    }
+}
+
+impl<K: Scalar<K>> Index<RangeFrom<usize>> for Vector<K> {
+    type Output = [K];
+
+    fn index(&self, range: RangeFrom<usize>) -> &Self::Output {
+        &self.vector[range]
+    }
+}
+
+impl<K: Scalar<K>> Index<RangeTo<usize>> for Vector<K> {
+    type Output = [K];
+
+    fn index(&self, range: RangeTo<usize>) -> &Self::Output {
+        &self.vector[range]
     }
 }
