@@ -5,6 +5,7 @@ use derive_more::{Deref, DerefMut, Index, IndexMut};
 use itertools::Itertools;
 use num::{pow::Pow, Float, NumCast};
 use std::fmt;
+use std::mem::swap;
 
 #[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut)]
 pub struct Matrix<K> {
@@ -27,17 +28,9 @@ where
         + std::ops::MulAssign
         + From<f32>,
 {
-    //     pub fn get(&self) -> Vec<Vec<K>> {
-    //         self.matrix.clone()
-    //     }
-
     pub fn shape(&self) -> (usize, usize) {
         (self.n, self.m)
     }
-
-    //     pub fn is_square(self) -> bool {
-    //         self.n == self.m
-    //     }
 
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
         Vector::from(
@@ -91,14 +84,13 @@ where
         let (mut pivot_row, mut pivot_col) = (0, 0);
         let mut res = self.clone();
         while pivot_row < nrows - 1 && pivot_col < ncols - 1 {
-            let mut max: K = <K as From<f32>>::from(f32::MIN);
-            let mut i_max = 0;
-            for i in pivot_row..nrows {
+            let (_, i_max) = (pivot_row..nrows).fold((f32::MIN.into(), 0), |(max, i_max), i| {
                 if res[i][pivot_col].abs() > max {
-                    max = res[i][pivot_col];
-                    i_max = i;
+                    (res[i][pivot_col], i)
+                } else {
+                    (max, i_max)
                 }
-            }
+            });
             if res[i_max][pivot_col] == 0.0.into() {
                 pivot_col += 1;
             } else {
