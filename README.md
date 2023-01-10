@@ -41,3 +41,12 @@ Checkout the docs:
 ```
 cargo doc --open
 ```
+
+To checkout the projection matrix display:
+```
+mkdir projection_display
+tar -xvzf display_linux.tar.gz -C projection_display 
+cargo run --bin projection_matrix | sed 's/.//;s/.$//' > projection_display/proj
+cd projection_display
+./display
+```
