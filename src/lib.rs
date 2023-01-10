@@ -1,48 +1,85 @@
 pub mod matrix;
 pub mod vector;
 
-use num::traits::float::Float;
+use num::{pow::Pow, Float, NumCast};
 use std::{
     iter::Sum,
-    ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign},
+    ops::{AddAssign, MulAssign, SubAssign},
 };
 
 pub trait Scalar<K>:
-    From<K>
-    + PartialEq<K>
-    + PartialEq
-    + Copy
-    + std::fmt::Debug
-    + Clone
-    + Float
-    + Sum<K>
+    Sum<K>
     + AddAssign<K>
     + SubAssign<K>
     + MulAssign<K>
     + Default
+    + NumCast
+    + From<f32>
+    + Into<f32>
+    + Pow<f32>
+    + Float
 {
 }
 
 impl<
-        K: From<f32>
-            + PartialEq<f32>
-            + PartialEq
-            + Copy
-            + std::fmt::Debug
-            + Clone
-            + Float
-            + Sum<K>
+        K: Sum<K>
             + AddAssign<K>
             + SubAssign<K>
             + MulAssign<K>
-            + Default,
+            + Default
+            + NumCast
+            + From<f32>
+            + Into<f32>
+            + Pow<f32>
+            + Float,
     > Scalar<K> for K
 {
 }
 
-pub trait VectorSpace<V, K> {
-    // fn _add(&mut self, v: &V);
-    // fn _sub(&mut self, v: &V);
-    // fn scl(&mut self, a: K);
-    // fn inv_scl(&mut self, a: K);
+/// This macro enables the implementation of Add, AddAssign, Sub, SubAssign, Mul and MulAssign for Vector and Matrix
+#[macro_export]
+macro_rules! arithmetic {
+    ($struct:tt, Add) => {
+        arithmetic!($struct, Add, +=);
+    };
+    ($struct:tt, Sub) => {
+        arithmetic!($struct, Sub, -=);
+    };
+    ($struct:tt, Mul) => {
+        arithmetic!($struct, Mul, *=);
+    };
+    (Vector, $trait:ty, $op:tt) => {
+        paste::item! {
+        impl<K: Scalar<K>> [<$trait Assign>] for Vector<K> {
+            fn [<$trait:lower _assign>](&mut self, rhs: Self) {
+                self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
+                    *u $op *v;
+                });
+            }
+        }}
+        arithmetic!(Vector, $trait);
+    };
+    (Matrix, $trait:ty, $op:tt) => {
+        paste::item! {
+        impl<K: Scalar<K>> [<$trait Assign>] for Matrix<K> {
+            fn [<$trait:lower _assign>](&mut self, rhs: Self) {
+                self.iter_mut().zip_eq(rhs.iter()).for_each(|(m, n)| {
+                    *m $op n.clone();
+                });
+            }
+        }}
+        arithmetic!(Matrix, $trait);
+    };
+    ($struct:ty, $trait:ty) => {
+        paste::item! {
+        impl<K: Scalar<K>> $trait for $struct<K> {
+            type Output = Self;
+
+            fn [<$trait:lower>](self, f: Self) -> Self::Output {
+                let mut res = self;
+                res.[<$trait:lower _assign>](f);
+                res
+            }
+        }}
+    }
 }

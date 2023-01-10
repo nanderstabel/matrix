@@ -1,10 +1,13 @@
-use crate::vector::Vector;
-use crate::*;
+use crate::{arithmetic, vector::Vector, Scalar};
 use anyhow::{anyhow, Result};
 use derive_more::{Deref, DerefMut, Index, IndexMut};
 use itertools::Itertools;
-use num::{pow::Pow, Float, NumCast};
-use std::fmt;
+use num::pow::Pow;
+use std::{
+    fmt,
+    iter::Sum,
+    ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 #[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut, PartialEq)]
 pub struct Matrix<K> {
@@ -17,15 +20,9 @@ pub struct Matrix<K> {
     pub m: usize,
 }
 
-impl<K: Scalar<K> + Float> Matrix<K>
+impl<K: Scalar<K>> Matrix<K>
 where
-    f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32>
-        + std::fmt::Display
-        + NumCast
-        + std::ops::SubAssign
-        + std::ops::MulAssign
-        + From<f32>,
+    f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,
 {
     pub fn shape(&self) -> (usize, usize) {
         (self.n, self.m)
@@ -48,10 +45,9 @@ where
     }
 
     pub fn transpose(&self) -> Matrix<K> {
-        let len = self[0].len();
         let mut iters: Vec<_> = self.iter().map(|n| n.iter()).collect();
 
-        (0..len)
+        (0..self[0].len())
             .map(|_| iters.iter_mut().map(|n| *n.next().unwrap()).collect())
             .collect()
     }
@@ -60,12 +56,6 @@ where
         let (nrows, ncols) = self.shape();
         let (mut pivot_row, mut pivot_col) = (0, 0);
         let mut res = self.clone();
-
-        // let mut res: Matrix<K> = self
-        //     .into_iter()
-        //     .map(|v| v.into_iter().collect::<Vector<K>>())
-        //     .collect_vec()
-        //     .into();
 
         while pivot_row < nrows - 1 && pivot_col < ncols - 1 {
             let (_, i_max) = (pivot_row..nrows).fold((f32::MIN.into(), 0), |(max, i_max), i| {
@@ -188,46 +178,13 @@ where
     pub fn rank(&mut self) -> usize {
         (self.clone().reduced_row_echelon())
             .iter()
-            .filter(|r| r.iter().filter(|&&n| n != Default::default()).count() > 0)
+            .filter(|r| r.iter().any(|n| *n != Default::default()))
             .count()
     }
 }
 
-impl<K: Scalar<K>> Add for Matrix<K> {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        let mut res = self;
-        res += other;
-        res
-    }
-}
-
-impl<K: Scalar<K>> AddAssign for Matrix<K> {
-    fn add_assign(&mut self, rhs: Self) {
-        self.iter_mut().zip_eq(rhs.iter()).for_each(|(m, n)| {
-            *m += n.clone();
-        });
-    }
-}
-
-impl<K: Scalar<K>> Sub for Matrix<K> {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self {
-        let mut res = self;
-        res -= other;
-        res
-    }
-}
-
-impl<K: Scalar<K>> SubAssign for Matrix<K> {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.iter_mut().zip_eq(rhs.iter()).for_each(|(m, n)| {
-            *m -= n.clone();
-        });
-    }
-}
+arithmetic!(Matrix, Add);
+arithmetic!(Matrix, Sub);
 
 impl Mul<f32> for Matrix<f32> {
     type Output = Self;
@@ -239,7 +196,7 @@ impl Mul<f32> for Matrix<f32> {
     }
 }
 
-impl<K: Scalar<K> + From<f32>> MulAssign<f32> for Matrix<K>
+impl<K: Scalar<K>> MulAssign<f32> for Matrix<K>
 where
     Vector<K>: MulAssign<f32>,
 {
@@ -250,39 +207,21 @@ where
     }
 }
 
-// impl<K: Scalar<K>> From<&[Vector<K>]> for Matrix<K> {
-//     fn from(value: &[Vector<K>]) -> Self {
-//         value.into_iter().map(Clone::clone).collect_vec().into()
-//     }
-// }
+impl<K: Scalar<K>> From<&[Vector<K>]> for Matrix<K> {
+    fn from(value: &[Vector<K>]) -> Self {
+        value.into_iter().map(Clone::clone).collect_vec().into()
+    }
+}
 
-// impl<K: Scalar<K>, const N: usize, const M: usize> From<[[K; M]; N]> for Matrix<K> {
-//     fn from(value: [[K; M]; N]) -> Self {
-//         value.into_iter().map(Into::into).collect_vec().into()
-//     }
-// }
+impl<K: Scalar<K>, const N: usize, const M: usize> From<[[K; M]; N]> for Matrix<K> {
+    fn from(value: [[K; M]; N]) -> Self {
+        value.into_iter().map(Into::into).collect_vec().into()
+    }
+}
 
-// impl<K: Scalar<K>> From<Vec<Vector<K>>> for Matrix<K> {
-//     fn from(value: Vec<Vector<K>>) -> Self {
-//         let matrix: Vec<Vector<K>> = value.into_iter().collect_vec();
-//         Matrix {
-//             n: matrix[0].vector.len(),
-//             m: if matrix[0].vector.is_empty() {
-//                 0
-//             } else {
-//                 matrix.len()
-//             },
-//             matrix,
-//         }
-//     }
-// }
-
-impl<T: Into<Vec<Vector<K>>>, K: Scalar<K>> From<T> for Matrix<K>
-where
-    Vector<K>: From<Vec<K>>,
-{
-    fn from(value: T) -> Self {
-        let matrix: Vec<Vector<K>> = value.into();
+impl<K: Scalar<K>> From<Vec<Vector<K>>> for Matrix<K> {
+    fn from(value: Vec<Vector<K>>) -> Self {
+        let matrix: Vec<Vector<K>> = value.into_iter().collect_vec();
         Matrix {
             n: matrix[0].vector.len(),
             m: if matrix[0].vector.is_empty() {
@@ -301,7 +240,7 @@ impl<K: Scalar<K>> FromIterator<Vector<K>> for Matrix<K> {
     }
 }
 
-impl<K: Scalar<K>> fmt::Display for Matrix<K> {
+impl<K: Scalar<K> + std::fmt::Debug> fmt::Display for Matrix<K> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.n == 0 {
             write!(f, "[]")

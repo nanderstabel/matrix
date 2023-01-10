@@ -4,10 +4,7 @@ use std::iter::Sum;
 
 fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K>
 where
-    f32: Sum<K>,
-    f32: From<K>,
-    f32: Sum<<K as Pow<f32>>::Output>,
-    K: Pow<f32>,
+    f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,
 {
     Vector::from([
         (u[1] * v[2]) - (u[2] * v[1]),

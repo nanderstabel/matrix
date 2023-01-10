@@ -2,10 +2,9 @@ use matrix::{matrix::Matrix, vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
 
-fn linear_combination<K>(u: &[Vector<K>], coefs: &[K]) -> Vector<K>
+fn linear_combination<K: Scalar<K>>(u: &[Vector<K>], coefs: &[K]) -> Vector<K>
 where
-    K: Scalar<K> + Pow<f32> + std::fmt::Display + From<f32>,
-    f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
+    f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,
 {
     Matrix::from(u).transpose().mul_vec(&coefs.into())
 }

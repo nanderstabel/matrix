@@ -5,7 +5,6 @@ use std::iter::Sum;
 fn angle_cos<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> f32
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32> + From<f32>,
 {
     f32::from(u.dot(v.clone())) / (u.clone().norm() * v.clone().norm())
 }

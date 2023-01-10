@@ -1,8 +1,11 @@
-use crate::*;
+use crate::{arithmetic, Scalar};
 use derive_more::{Deref, DerefMut, Display, Index, IndexMut};
 use itertools::Itertools;
-use num::{pow::Pow, Float};
-use std::{fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
+use num::pow::Pow;
+use std::{
+    iter::Sum,
+    ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 #[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut, PartialEq, Display)]
 #[display(fmt = "{:?}", vector)]
@@ -15,10 +18,9 @@ pub struct Vector<K> {
     size: usize,
 }
 
-impl<K: Scalar<K> + Float> Vector<K>
+impl<K: Scalar<K>> Vector<K>
 where
-    f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,
-    K: num::traits::Pow<f32> + std::convert::From<f32>,
+    f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,
 {
     pub fn size(&self) -> usize {
         self.size
@@ -45,47 +47,7 @@ where
     }
 }
 
-impl<K: Scalar<K>> Add for Vector<K> {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        let mut res = self;
-        res += other;
-        res
-    }
-}
-
-impl<K: Scalar<K>> AddAssign for Vector<K> {
-    fn add_assign(&mut self, rhs: Self) {
-        if self.size == 0 {
-            *self = rhs;
-            return;
-        }
-        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
-            *u += *v;
-        });
-    }
-}
-
-impl<K: Scalar<K>> Sub for Vector<K> {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        let mut res = self;
-        res -= other;
-        res
-    }
-}
-
-impl<K: Scalar<K>> SubAssign for Vector<K> {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
-            *u -= *v;
-        });
-    }
-}
-
-impl<K: Scalar<K> + std::convert::From<K>> Mul<K> for Vector<K> {
+impl<K: Scalar<K>> Mul<K> for Vector<K> {
     type Output = Self;
 
     fn mul(self, f: K) -> Self::Output {
@@ -95,7 +57,7 @@ impl<K: Scalar<K> + std::convert::From<K>> Mul<K> for Vector<K> {
     }
 }
 
-impl<K: Scalar<K> + std::convert::From<K>> MulAssign<K> for Vector<K> {
+impl<K: Scalar<K>> MulAssign<K> for Vector<K> {
     fn mul_assign(&mut self, rhs: K) {
         self.iter_mut().for_each(|u| {
             *u *= rhs;
@@ -103,23 +65,9 @@ impl<K: Scalar<K> + std::convert::From<K>> MulAssign<K> for Vector<K> {
     }
 }
 
-impl<K: Scalar<K> + std::convert::From<K>> Mul<Vector<K>> for Vector<K> {
-    type Output = Self;
-
-    fn mul(self, f: Vector<K>) -> Self::Output {
-        let mut res = self;
-        res.mul_assign(f);
-        res
-    }
-}
-
-impl<K: Scalar<K> + std::convert::From<K>> MulAssign<Vector<K>> for Vector<K> {
-    fn mul_assign(&mut self, rhs: Vector<K>) {
-        self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
-            *u *= *v;
-        });
-    }
-}
+arithmetic!(Vector, Add);
+arithmetic!(Vector, Sub);
+arithmetic!(Vector, Mul);
 
 impl<T: Into<Vec<K>>, K: Scalar<K>> From<T> for Vector<K> {
     fn from(v: T) -> Self {
