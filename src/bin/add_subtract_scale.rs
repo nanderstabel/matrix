@@ -1,9 +1,14 @@
-use matrix::vector::Vector;
+use matrix::{complex::Complex, vector::Vector};
 
 #[allow(dead_code)]
 fn main() {
-    let mut u = Vector::from([2., 3.]);
-    let v = Vector::from([5., 7.]);
+    // let mut u = Vector::from([2., 3.]);
+    // let v = Vector::from([5., 7.]);
+    // u += v;
+    // println!("{}\n", u);
+
+    let mut u = Vector::<Complex>::from(vec![(2., 5.).into(), (3., 6.0).into()]);
+    let v = Vector::<Complex>::from(vec![(5., 8.).into(), (7., 10.).into()]);
     u += v;
     println!("{}\n", u);
 }

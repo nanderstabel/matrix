@@ -1,4 +1,4 @@
-use crate::{arithmetic, Scalar};
+use crate::{arithmetic, complex::Complex, Scalar};
 use derive_more::{Deref, DerefMut, Display, Index, IndexMut};
 use itertools::Itertools;
 use num::pow::Pow;
@@ -70,6 +70,16 @@ arithmetic!(Vector, Sub);
 arithmetic!(Vector, Mul);
 
 impl<T: Into<Vec<K>>, K: Scalar<K>> From<T> for Vector<K> {
+    fn from(v: T) -> Self {
+        let vector = v.into();
+        Vector {
+            size: vector.len(),
+            vector,
+        }
+    }
+}
+
+impl<T: Into<Vec<Complex>>> From<T> for Vector<Complex> {
     fn from(v: T) -> Self {
         let vector = v.into();
         Vector {

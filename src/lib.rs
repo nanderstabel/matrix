@@ -1,3 +1,4 @@
+pub mod complex;
 pub mod matrix;
 pub mod vector;
 
@@ -66,5 +67,24 @@ macro_rules! arithmetic {
                 res
             }
         }}
+
+        paste::item! {
+            impl [<$trait Assign>] for $struct<
+            crate::complex::Complex> {
+                fn [<$trait:lower _assign>](&mut self, rhs: Self) {
+                    self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
+                        *u $op v.clone();
+                    });
+                }
+            }
+            impl $trait for $struct<crate::complex::Complex> {
+                type Output = Self;
+
+                fn [<$trait:lower>](self, f: Self) -> Self::Output {
+                    let mut res = self;
+                    res.[<$trait:lower _assign>](f);
+                    res
+                }
+            }}
     }
 }
