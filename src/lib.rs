@@ -36,7 +36,7 @@ impl<
 {
 }
 
-/// This macro enables the implementation of Add, AddAssign, Sub, SubAssign, Mul and MulAssign for Vector and Matrix
+/// This macro enables the implementation of Add, AddAssign, Sub, SubAssign, Mul and MulAssign for Vector and Matrix.
 #[macro_export]
 macro_rules! arithmetic {
     ($struct:tt, Add) => {
@@ -48,30 +48,15 @@ macro_rules! arithmetic {
     ($struct:tt, Mul) => {
         arithmetic!($struct, Mul, *=);
     };
-    (Vector, $trait:ty, $op:tt) => {
+    ($struct:ty, $trait:ty, $op:tt) => {
         paste::item! {
-        impl<K: Scalar<K>> [<$trait Assign>] for Vector<K> {
+        impl<K: Scalar<K>> [<$trait Assign>] for $struct<K> {
             fn [<$trait:lower _assign>](&mut self, rhs: Self) {
                 self.iter_mut().zip_eq(rhs.iter()).for_each(|(u, v)| {
-                    *u $op *v;
+                    *u $op v.clone();
                 });
             }
-        }}
-        arithmetic!(Vector, $trait);
-    };
-    (Matrix, $trait:ty, $op:tt) => {
-        paste::item! {
-        impl<K: Scalar<K>> [<$trait Assign>] for Matrix<K> {
-            fn [<$trait:lower _assign>](&mut self, rhs: Self) {
-                self.iter_mut().zip_eq(rhs.iter()).for_each(|(m, n)| {
-                    *m $op n.clone();
-                });
-            }
-        }}
-        arithmetic!(Matrix, $trait);
-    };
-    ($struct:ty, $trait:ty) => {
-        paste::item! {
+        }
         impl<K: Scalar<K>> $trait for $struct<K> {
             type Output = Self;
 
