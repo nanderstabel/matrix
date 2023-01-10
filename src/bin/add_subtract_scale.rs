@@ -1,4 +1,4 @@
-use matrix::{matrix::Matrix, vector::Vector};
+use matrix::vector::Vector;
 
 #[allow(dead_code)]
 fn main() {
@@ -11,6 +11,7 @@ fn main() {
 #[cfg(test)]
 mod add_subtract_scale {
     use super::*;
+    use matrix::matrix::Matrix;
 
     #[test]
     fn test_vector_add() {

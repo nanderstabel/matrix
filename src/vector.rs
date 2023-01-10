@@ -1,17 +1,18 @@
 use crate::*;
-use derive_more::{Deref, DerefMut, Index, IndexMut};
+use derive_more::{Deref, DerefMut, Display, Index, IndexMut};
 use itertools::Itertools;
 use num::{pow::Pow, Float};
 use std::{fmt, iter::Sum, ops::AddAssign, ops::MulAssign, ops::SubAssign};
 
-#[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut)]
+#[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut, PartialEq, Display)]
+#[display(fmt = "{:?}", vector)]
 pub struct Vector<K> {
-    size: usize,
     #[deref]
     #[deref_mut]
     #[index]
     #[index_mut]
     pub vector: Vec<K>,
+    size: usize,
 }
 
 impl<K: Scalar<K> + Float> Vector<K>
@@ -42,25 +43,6 @@ where
             .abs()
             .into()
     }
-}
-
-impl<K: Scalar<K>> VectorSpace<Vector<K>, K> for Vector<K> {
-    // fn _sub(&mut self, v: &Vector<K>) {
-    //     self.vector = self
-    //         .vector
-    //         .iter()
-    //         .zip(v.vector.iter())
-    //         .map(|(&u, &ve)| u - ve)
-    //         .collect()
-    // }
-
-    // fn scl(&mut self, a: K) {
-    //     self.vector = self.vector.iter().map(|&v| v * a).collect()
-    // }
-
-    // fn inv_scl(&mut self, a: K) {
-    //     self.vector = self.vector.iter().map(|&v| v / a).collect()
-    // }
 }
 
 impl<K: Scalar<K>> Add for Vector<K> {
@@ -149,26 +131,8 @@ impl<T: Into<Vec<K>>, K: Scalar<K>> From<T> for Vector<K> {
     }
 }
 
-impl<K: Clone + PartialEq> PartialEq for Vector<K> {
-    fn eq(&self, other: &Self) -> bool {
-        self.vector == other.vector
-    }
-}
-
-impl<K: Clone + PartialEq> Eq for Vector<K> {}
-
-impl<K: std::fmt::Debug> fmt::Display for Vector<K> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self.vector)
-    }
-}
-
 impl<K: Scalar<K>> FromIterator<K> for Vector<K> {
     fn from_iter<T: IntoIterator<Item = K>>(iter: T) -> Self {
-        let vector: Vec<K> = iter.into_iter().collect();
-        Vector {
-            size: vector.len(),
-            vector,
-        }
+        iter.into_iter().collect::<Vec<K>>().into()
     }
 }

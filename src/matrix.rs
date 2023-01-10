@@ -5,17 +5,16 @@ use derive_more::{Deref, DerefMut, Index, IndexMut};
 use itertools::Itertools;
 use num::{pow::Pow, Float, NumCast};
 use std::fmt;
-use std::mem::swap;
 
-#[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut)]
+#[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut, PartialEq)]
 pub struct Matrix<K> {
-    pub n: usize,
-    pub m: usize,
     #[deref]
     #[deref_mut]
     #[index]
     #[index_mut]
     pub matrix: Vec<Vector<K>>,
+    pub n: usize,
+    pub m: usize,
 }
 
 impl<K: Scalar<K> + Float> Matrix<K>
@@ -33,29 +32,15 @@ where
     }
 
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
-        Vector::from(
-            self.iter()
-                .map(|v| (v.clone() * vec.clone()).vector.into_iter().sum::<K>())
-                .collect_vec(),
-        )
+        self.iter()
+            .map(|v| (v.clone() * vec.clone()).vector.into_iter().sum())
+            .collect()
     }
 
     pub fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
-        let mut mat = mat.clone().transpose();
-        mat.matrix = (0..self.n)
-            .map(|row| {
-                (0..mat.m)
-                    .map(|column| {
-                        let r = self[row].clone();
-                        let c = mat[column].clone();
-                        r.dot(c)
-                    })
-                    .collect()
-            })
-            .collect();
-        mat.m = mat.n;
-        mat.n = self.n;
-        mat
+        self.iter()
+            .map(|v| mat.transpose().iter().map(|u| u.dot(v.clone())).collect())
+            .collect()
     }
 
     pub fn trace(&mut self) -> K {
@@ -66,23 +51,22 @@ where
         let len = self[0].len();
         let mut iters: Vec<_> = self.iter().map(|n| n.iter()).collect();
 
-        Matrix::from(
-            (0..len)
-                .map(|_| {
-                    iters
-                        .iter_mut()
-                        .map(|n| *n.next().unwrap())
-                        .collect::<Vector<K>>()
-                })
-                .collect::<Vec<Vector<K>>>()
-                .as_slice(),
-        )
+        (0..len)
+            .map(|_| iters.iter_mut().map(|n| *n.next().unwrap()).collect())
+            .collect()
     }
 
     fn row_echelon(&mut self) -> Matrix<K> {
         let (nrows, ncols) = self.shape();
         let (mut pivot_row, mut pivot_col) = (0, 0);
         let mut res = self.clone();
+
+        // let mut res: Matrix<K> = self
+        //     .into_iter()
+        //     .map(|v| v.into_iter().collect::<Vector<K>>())
+        //     .collect_vec()
+        //     .into();
+
         while pivot_row < nrows - 1 && pivot_col < ncols - 1 {
             let (_, i_max) = (pivot_row..nrows).fold((f32::MIN.into(), 0), |(max, i_max), i| {
                 if res[i][pivot_col].abs() > max {
@@ -91,25 +75,23 @@ where
                     (max, i_max)
                 }
             });
-            if res[i_max][pivot_col] == 0.0.into() {
-                pivot_col += 1;
-            } else {
+            if res[i_max][pivot_col] != K::default() {
                 for j in 0..res.m {
                     let tmp = res[i_max][j];
                     res[i_max][j] = res[pivot_row][j];
                     res[pivot_row][j] = tmp;
                 }
                 for i in (pivot_row + 1)..nrows {
-                    let ratio: K = res[i][pivot_col] / res[pivot_row][pivot_col];
-                    res[i][pivot_col] = <K as From<f32>>::from(0.);
+                    let ratio = res[i][pivot_col] / res[pivot_row][pivot_col];
+                    res[i][pivot_col] = K::default();
                     for j in (pivot_row + 1)..ncols {
                         let tmp = res[pivot_row][j] * ratio;
                         res[i][j] -= tmp;
                     }
                 }
-                pivot_row += 1;
                 pivot_col += 1;
             }
+            pivot_row += 1;
         }
         res
     }
@@ -151,45 +133,42 @@ where
         res
     }
 
-    fn dim2_determinant(&self, m: Vec<Vector<K>>) -> K {
-        m[0][0] * m[1][1] - m[0][1] * m[1][0]
-    }
-
-    fn dim3_determinant(&self, m: Vec<Vector<K>>) -> K {
-        m[0][0] * self.dim2_determinant(vec![Vector::from(&m[1][1..]), Vector::from(&m[2][1..])])
-            - m[0][1]
-                * self.dim2_determinant(vec![
-                    Vector::from([m[1][0], m[1][2]]),
-                    Vector::from([m[2][0], m[2][2]]),
-                ])
-            + m[0][2]
-                * self.dim2_determinant(vec![Vector::from(&m[1][..2]), Vector::from(&m[2][..2])])
-    }
-
-    fn dim4_determinant(&self) -> K {
-        let mut determinant = <K as From<f32>>::from(1.);
-        let res = self.clone().row_echelon();
-        for i in 0..res.n {
-            determinant *= res[i][i];
-        }
-        determinant
-    }
-
     pub fn determinant(&mut self) -> K {
         match self.shape() {
-            (2, 2) => self.dim2_determinant(self.matrix.clone()),
-            (3, 3) => self.dim3_determinant(self.matrix.clone()),
-            _ => self.dim4_determinant(),
+            (2, 2) => self[0][0] * self[1][1] - self[0][1] * self[1][0],
+            (3, 3) => {
+                self[0][0]
+                    * Matrix::from([
+                        ([self[1][1], self[1][2]]).into(),
+                        ([self[2][1], self[2][2]]).into(),
+                    ])
+                    .determinant()
+                    - self[0][1]
+                        * Matrix::from([
+                            ([self[1][0], self[1][2]]).into(),
+                            ([self[2][0], self[2][2]]).into(),
+                        ])
+                        .determinant()
+                    + self[0][2]
+                        * Matrix::from([
+                            ([self[1][0], self[1][1]]).into(),
+                            ([self[2][0], self[2][1]]).into(),
+                        ])
+                        .determinant()
+            }
+            (4, 4) => {
+                let res = self.clone().row_echelon();
+                (0..res.n).fold(1.0.into(), |determinant, i| determinant * res[i][i])
+            }
+            _ => panic!("Cannot calculate determinant"),
         }
     }
 
     fn augmented(&mut self) -> Matrix<K> {
         let mut res = self.clone();
         for j in 0..self.m {
-            for i in 0..(self.n) {
-                res[j]
-                    .vector
-                    .push(if j == i { 1.0.into() } else { 0.0.into() });
+            for i in 0..self.n {
+                res[j].push(if j == i { 1.0.into() } else { 0.0.into() });
             }
         }
         res.n *= 2;
@@ -201,13 +180,9 @@ where
             return Err(anyhow!("Matrix is singular"));
         }
         let reduced = self.augmented().reduced_row_echelon();
-        let mut res = self.clone();
-        for j in 0..res.m {
-            for i in 0..res.n {
-                res[j][i] = reduced[j][i + res.n];
-            }
-        }
-        Ok(res)
+        Ok((0..self.m)
+            .map(|j| (0..self.n).map(|i| reduced[j][i + self.n]).collect())
+            .collect())
     }
 
     pub fn rank(&mut self) -> usize {
@@ -264,9 +239,9 @@ impl Mul<f32> for Matrix<f32> {
     }
 }
 
-impl<K: Scalar<K> + std::convert::From<f32>> MulAssign<f32> for Matrix<K>
+impl<K: Scalar<K> + From<f32>> MulAssign<f32> for Matrix<K>
 where
-    Vector<K>: std::ops::MulAssign<f32>,
+    Vector<K>: MulAssign<f32>,
 {
     fn mul_assign(&mut self, rhs: f32) {
         self.iter_mut().for_each(|u| {
@@ -275,9 +250,39 @@ where
     }
 }
 
-impl<K: Scalar<K>> From<&[Vector<K>]> for Matrix<K> {
-    fn from(value: &[Vector<K>]) -> Self {
-        let matrix = value.to_vec();
+// impl<K: Scalar<K>> From<&[Vector<K>]> for Matrix<K> {
+//     fn from(value: &[Vector<K>]) -> Self {
+//         value.into_iter().map(Clone::clone).collect_vec().into()
+//     }
+// }
+
+// impl<K: Scalar<K>, const N: usize, const M: usize> From<[[K; M]; N]> for Matrix<K> {
+//     fn from(value: [[K; M]; N]) -> Self {
+//         value.into_iter().map(Into::into).collect_vec().into()
+//     }
+// }
+
+// impl<K: Scalar<K>> From<Vec<Vector<K>>> for Matrix<K> {
+//     fn from(value: Vec<Vector<K>>) -> Self {
+//         let matrix: Vec<Vector<K>> = value.into_iter().collect_vec();
+//         Matrix {
+//             n: matrix[0].vector.len(),
+//             m: if matrix[0].vector.is_empty() {
+//                 0
+//             } else {
+//                 matrix.len()
+//             },
+//             matrix,
+//         }
+//     }
+// }
+
+impl<T: Into<Vec<Vector<K>>>, K: Scalar<K>> From<T> for Matrix<K>
+where
+    Vector<K>: From<Vec<K>>,
+{
+    fn from(value: T) -> Self {
+        let matrix: Vec<Vector<K>> = value.into();
         Matrix {
             n: matrix[0].vector.len(),
             m: if matrix[0].vector.is_empty() {
@@ -290,38 +295,19 @@ impl<K: Scalar<K>> From<&[Vector<K>]> for Matrix<K> {
     }
 }
 
-impl<K: Scalar<K>, const N: usize, const M: usize> From<[[K; M]; N]> for Matrix<K> {
-    fn from(value: [[K; M]; N]) -> Self {
-        let matrix: Vec<Vector<K>> = value.into_iter().map(Into::into).collect_vec();
-        Matrix {
-            n: matrix[0].vector.len(),
-            m: if matrix[0].vector.is_empty() {
-                0
-            } else {
-                matrix.len()
-            },
-            matrix,
-        }
+impl<K: Scalar<K>> FromIterator<Vector<K>> for Matrix<K> {
+    fn from_iter<T: IntoIterator<Item = Vector<K>>>(iter: T) -> Self {
+        iter.into_iter().collect::<Vec<Vector<K>>>().into()
     }
 }
-
-impl<K: Scalar<K>> PartialEq for Matrix<K> {
-    fn eq(&self, other: &Self) -> bool {
-        self.matrix == other.matrix
-    }
-}
-
-impl<K: Scalar<K>> Eq for Matrix<K> {}
 
 impl<K: Scalar<K>> fmt::Display for Matrix<K> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.n == 0 {
-            write!(f, "[]")?;
+            write!(f, "[]")
         } else {
-            self.iter().for_each(|u| {
-                writeln!(f, "{}", u).unwrap();
-            })
+            self.iter()
+                .fold(Ok(()), |result, v| result.and_then(|_| writeln!(f, "{v}")))
         }
-        Ok(())
     }
 }
