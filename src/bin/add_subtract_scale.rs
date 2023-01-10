@@ -1,11 +1,17 @@
-use matrix::vector::Vector;
+use matrix::{matrix::Matrix, vector::Vector};
 
+/// Binary to demonstrate addition, subtraction and scaling of both [`Vector`] and [`Matrix`].
 #[allow(dead_code)]
 fn main() {
     let mut u = Vector::from([2., 3.]);
     let v = Vector::from([5., 7.]);
     u += v;
     println!("{}\n", u);
+
+    let mut u = Matrix::from([[1., 2.], [3., 4.]]);
+    let v = Matrix::from([[7., 4.], [-2., 2.]]);
+    u += v;
+    assert_eq!(u, Matrix::from([[8., 6.], [1., 6.]]));
 }
 
 #[cfg(test)]

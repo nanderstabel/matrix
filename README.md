@@ -37,4 +37,7 @@ To run all tests at once:
 cargo test
 ```
 
-More information on the different binaries can be found [here](https://github.com/nanderstabel/matrix/tree/main/src/bin)
+Checkout the docs:
+```
+cargo doc --open
+```

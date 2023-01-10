@@ -7,6 +7,7 @@ use std::{
     ops::{AddAssign, MulAssign, SubAssign},
 };
 
+/// Trait bounds for `K`.
 pub trait Scalar<K>:
     Sum<K>
     + AddAssign<K>

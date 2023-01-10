@@ -2,6 +2,7 @@ use matrix::{matrix::Matrix, vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
 
+/// Calculates the linear combination of a set of [`Vector`]'s scaled by their respective coefficients.
 fn linear_combination<K: Scalar<K>>(u: &[Vector<K>], coefs: &[K]) -> Vector<K>
 where
     f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,

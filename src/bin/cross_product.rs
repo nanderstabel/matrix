@@ -2,6 +2,7 @@ use matrix::{vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
 
+/// Calculate the cross product of two [`Vector`]'s.
 fn cross_product<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> Vector<K>
 where
     f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,

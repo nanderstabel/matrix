@@ -9,6 +9,7 @@ use std::{
     ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
+/// Matrix struct that consists of a `Vec` of [`Vector`]'s and it's shape.
 #[derive(Clone, Debug, Default, Deref, DerefMut, Index, IndexMut, PartialEq)]
 pub struct Matrix<K> {
     #[deref]
@@ -28,22 +29,47 @@ where
         (self.n, self.m)
     }
 
+    /// Multiplies this [`Matrix`] by the given [`Vector`].
+    /// ```
+    /// let mut u = Matrix::from([[2., 0.], [0., 2.]]);
+    /// let v = Vector::from([4., 2.]);
+    /// assert_eq!(u.mul_vec(&v), Vector::from([8., 4.]));
+    /// ```
     pub fn mul_vec(&mut self, vec: &Vector<K>) -> Vector<K> {
         self.iter()
             .map(|v| (v.clone() * vec.clone()).vector.into_iter().sum())
             .collect()
     }
 
+    /// Multiplies this [`Matrix`] by the given `Matrix`.
+    /// ```
+    /// let mut u = Matrix::from([[3., -5.], [6., 8.]]);
+    /// let v = Matrix::from([[2., 1.], [4., 2.]]);
+    /// assert_eq!(u.mul_mat(&v), Matrix::from([[-14., -7.], [44., 22.]]));
+    /// ```
     pub fn mul_mat(&mut self, mat: &Matrix<K>) -> Matrix<K> {
         self.iter()
             .map(|v| mat.transpose().iter().map(|u| u.dot(v.clone())).collect())
             .collect()
     }
 
+    /// Computes the trace of the current [`Matrix`].
+    /// ```
+    /// let mut u = Matrix::from([[2., -5., 0.], [4., 3., 7.], [-2., 3., 4.]]);
+    /// assert_eq!(u.trace(), 9.0);
+    /// ```
     pub fn trace(&mut self) -> K {
         (0..self.n).map(|idx| self[idx][idx]).sum()
     }
 
+    /// Computes and returns the transpose matrix of the current [`Matrix`].
+    /// ```
+    /// let u = Matrix::from([[1., 2., 3.], [3., 4., 5.], [6., 7., 8.]]);
+    /// assert_eq!(
+    ///     u.transpose(),
+    ///     Matrix::from([[1., 3., 6.], [2., 4., 7.], [3., 5., 8.]])
+    /// );
+    /// ```
     pub fn transpose(&self) -> Matrix<K> {
         let mut iters: Vec<_> = self.iter().map(|n| n.iter()).collect();
 
@@ -86,6 +112,22 @@ where
         res
     }
 
+    /// Computes the reduced row-echelon form of the current [`Matrix`].
+    /// ```
+    /// let mut u = Matrix::from([
+    ///     [8., 5., -2., 4., 28.],
+    ///     [4., 2.5, 20., 4., -4.],
+    ///     [8., 5., 1., 4., 17.],
+    /// ]);
+    /// assert_eq!(
+    ///     u.reduced_row_echelon(),
+    ///     Matrix::from([
+    ///         [1., 0.625, 0., 0., -12.166668],
+    ///         [0., 0., 1., 0., -3.6666667],
+    ///         [-0., -0., -0., 1., 29.5],
+    ///     ])
+    /// );
+    /// ```
     pub fn reduced_row_echelon(&mut self) -> Matrix<K> {
         let mut pivot = 0;
         let mut res = self.clone();
@@ -123,6 +165,16 @@ where
         res
     }
 
+    /// Calculates the determinant of a [`Matrix`]. Currently only for matrices up to shape 4x4.
+    /// ```
+    /// let mut u = Matrix::from([
+    ///     [8., 5., -2., 4.],
+    ///     [4., 2.5, 20., 4.],
+    ///     [8., 5., 1., 4.],
+    ///     [28., -4., 17., 1.],
+    /// ]);
+    /// assert_eq!(u.determinant(), 1032.0);
+    /// ```
     pub fn determinant(&mut self) -> K {
         match self.shape() {
             (2, 2) => self[0][0] * self[1][1] - self[0][1] * self[1][0],
@@ -165,6 +217,20 @@ where
         res
     }
 
+    /// Calculates the inverse of the [`Matrix`].
+    /// ```
+    /// let mut u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.]]);
+    /// if let Ok(inverse) = u.inverse() {
+    ///     assert_eq!(
+    ///         inverse,
+    ///         Matrix::from([
+    ///             [0.649425287, 0.097701149, -0.655172414],
+    ///             [-0.781609195, -0.126436782, 0.965517241],
+    ///             [0.143678161, 0.0747126454, -0.206896552]
+    ///         ])
+    ///     );
+    /// }
+    /// ```
     pub fn inverse(&mut self) -> Result<Matrix<K>> {
         if self.determinant() == 0.0.into() {
             return Err(anyhow!("Matrix is singular"));
@@ -175,6 +241,11 @@ where
             .collect())
     }
 
+    /// Cmputes the rank of the current [`Matrix`].
+    /// ```
+    /// let mut u = Matrix::from([[8., 5., -2.], [4., 7., 20.], [7., 6., 1.], [21., 18., 7.]]);
+    /// assert_eq!(u.rank(), 3);
+    /// ```
     pub fn rank(&mut self) -> usize {
         (self.clone().reduced_row_echelon())
             .iter()

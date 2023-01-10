@@ -16,13 +16,13 @@ mod linear_map {
 
     #[test]
     fn matrix_linear_map() {
-        // let mut u = Matrix::from([[1., 0.], [0., 1.]]);
-        // let v = Vector::from([4., 2.]);
-        // assert_eq!(u.mul_vec(&v), Vector::from([4., 2.]));
+        let mut u = Matrix::from([[1., 0.], [0., 1.]]);
+        let v = Vector::from([4., 2.]);
+        assert_eq!(u.mul_vec(&v), Vector::from([4., 2.]));
 
-        // let mut u = Matrix::from([[2., 0.], [0., 2.]]);
-        // let v = Vector::from([4., 2.]);
-        // assert_eq!(u.mul_vec(&v), Vector::from([8., 4.]));
+        let mut u = Matrix::from([[2., 0.], [0., 2.]]);
+        let v = Vector::from([4., 2.]);
+        assert_eq!(u.mul_vec(&v), Vector::from([8., 4.]));
 
         let mut u = Matrix::from([[2., -2.], [-2., 2.]]);
         let v = Vector::from([4., 2.]);

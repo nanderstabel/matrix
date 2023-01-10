@@ -2,6 +2,7 @@ use matrix::{vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
 
+/// Calculates the Cosine of two [`Vector`]'s.
 fn angle_cos<K: Scalar<K>>(u: &Vector<K>, v: &Vector<K>) -> f32
 where
     f32: Sum<K> + From<K> + Sum<<K as Pow<f32>>::Output>,

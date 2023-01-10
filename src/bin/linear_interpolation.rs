@@ -1,6 +1,7 @@
 use matrix::matrix::Matrix;
 use std::ops::{Add, Mul, Sub};
 
+/// Calculates the linear interpolation between two objects of the same type.
 fn lerp<V>(u: V, v: V, t: f32) -> V
 where
     V: Clone + Mul<f32, Output = V> + Add<Output = V> + Sub<Output = V>,
