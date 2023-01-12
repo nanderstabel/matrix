@@ -8,9 +8,9 @@ where
     f32: Sum<K> + Sum<<K as Pow<f32>>::Output>,
 {
     Vector::from([
-        (u[1] * v[2]) - (u[2] * v[1]),
-        (u[2] * v[0]) - (u[0] * v[2]),
-        (u[0] * v[1]) - (u[1] * v[0]),
+        (u[1] * v[2]) - (v[1] * u[2]),
+        (u[2] * v[0]) - (v[2] * u[0]),
+        (u[0] * v[1]) - (v[0] * u[1]),
     ])
 }
 
@@ -26,7 +26,7 @@ mod cosine {
     use super::*;
 
     #[test]
-    fn vector_cosine() {
+    fn vector_cross_product() {
         let u = Vector::from([0., 0., 1.]);
         let v = Vector::from([1., 0., 0.]);
         assert_eq!(cross_product(&u, &v), Vector::from([0., 1., 0.]));
