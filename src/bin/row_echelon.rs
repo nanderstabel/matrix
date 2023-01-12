@@ -7,6 +7,9 @@ fn main() {
         [8., 5., 1., 4., 17.],
     ]);
     println!("{}", u.reduced_row_echelon());
+
+    let mut u = Matrix::from([[1., 2., 3., 4.], [4., 5., 6., 7.], [6., 7., 8., 9.]]);
+    println!("{}", u.reduced_row_echelon());
 }
 
 #[cfg(test)]

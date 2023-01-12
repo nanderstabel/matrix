@@ -1,4 +1,4 @@
-use matrix::{vector::Vector, Scalar};
+use matrix::{matrix::Matrix, vector::Vector, Scalar};
 use num::pow::Pow;
 use std::iter::Sum;
 
@@ -15,10 +15,17 @@ where
 }
 
 fn main() {
+    let a = Vector::from([1., 1., 1.]);
     let u = Vector::from([1., 2., 3.]);
     let v = Vector::from([4., 5., 6.]);
 
-    println!("{}", cross_product(&u, &v));
+    let mut matrix = Matrix::from(vec![a, u, v]).transpose();
+
+    // dbg!(u.dot(v));
+
+    dbg!(matrix.determinant());
+
+    // println!("{}", cross_product(&u, &v));
 }
 
 #[cfg(test)]

@@ -1,12 +1,10 @@
 use matrix::vector::Vector;
 
 fn main() {
-    let v1 = Vector::from([2., 1.]);
-    let v2 = Vector::from([20., 10.]);
+    let v1 = Vector::from([1., 2.]);
+    let v2 = Vector::from([1., 2.]);
 
-    v1.dot(v2);
-
-    println!("{}", v1);
+    println!("{}", v1.dot(v2));
 }
 
 #[cfg(test)]

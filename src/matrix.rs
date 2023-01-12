@@ -177,6 +177,7 @@ where
     /// ```
     pub fn determinant(&mut self) -> K {
         match self.shape() {
+            (1, 1) => self[0][0],
             (2, 2) => self[0][0] * self[1][1] - self[0][1] * self[1][0],
             (3, 3) => {
                 self[0][0]
